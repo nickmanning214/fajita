@@ -1,0 +1,19 @@
+{
+  "name": "fajita",
+  "version": "0.0.0",
+  "description": "A custom extension of Backbone.js, providing deep models, directives, and other features.",
+  "main": "Base.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Nick Manning",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-preset-es2015-rollup": "^3.0.0",
+    "intern": "^3.4.2",
+    "rollup": "^0.41.4",
+    "rollup-plugin-commonjs": "^7.0.0",
+    "rollup-plugin-node-resolve": "^2.0.0",
+    "rollup-plugin-uglify": "^1.0.1"
+  }
+}
