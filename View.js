@@ -27,9 +27,10 @@ var backboneViewOptions = ['model', 'collection', 'el', 'id', 'attributes', 'cla
 var additionalViewOptions = ['mappings','templateString','childViewImports','subViewImports','index','lastIndex']
 export default Backbone.View.extend({
     constructor:function(options) {
+
+        if (!this.jst && !this.templateString) throw new Error("You need a template");
         if (!this.jst){
             this.cid = _.uniqueId(this.tplid);
-            this.templateString = $("#"+this.tplid).html();
             this.jst = _.template(this.templateString)
         }
         else{
