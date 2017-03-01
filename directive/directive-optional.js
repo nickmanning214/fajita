@@ -1,4 +1,4 @@
-import $ from "jquery";
+/*import $ from "jquery";*/
 import Directive from "./directive";
 
 export default Directive.extend({

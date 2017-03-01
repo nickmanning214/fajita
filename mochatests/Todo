@@ -1,0 +1,41 @@
+Error checkings for the developer:
+
+Common mistake is to misname "childViewImports" as "subViewImports". Check for this.
+Error checker for if you forget to nest mappings: Eg you put mappings:{h1Content:pageTitle} instead of mappings {Header:{h1Content:pageTitle}}. Check the reverse too. Sometimes you accidentally put items inside of Item for example.
+Error checker if you accidentally put the global name for a subview instead of the local subview name {FrameHeader:{h1Content:pageTitle}} instead of {Header:{h1Content:pageTitle}}
+Check if you forgot "->" in mappings
+Misspellings childViewImports or ChildViewImports
+
+
+Add/Remove Requirements:
+
+Don't require defaults if you don't have any variables in your template.
+Should a template be required? Sometimes you just want the structure of your app made.
+
+Testing:
+
+Include the whole docfrag stuff in your testing.
+
+Features:
+
+Allow passing models/collections into constructor for models.
+Extend should merge objects sometimes.
+Tempted to say no more element creation. Doesn't make a ton of sense since you can't put directives on the outer element. However there still might be a place for it. Not sure.
+
+Remove tagName from mapped childview and then add to the collection, you see an error dummydiv is not defined
+
+
+
+NOTES:
+
+ - You don't want to get in the habit of making subviews just for the sake of it. A subview should be for when you want a view to be embedded as part of many different parent views. Not just to clean up a template.
+ - It's not necessary to test changing app.set inside of a backbone.view events hash. Just test calling app.set
+ DONE:
+
+ !!!IMPORTANT!!! You need to be able to have mappings on a class declaration, not just passed as an option on init. That's because sometimes there are default models/collections that have dummy app values as properties and they need to be mapped to template values.
+👆🏻Turns out this was already done. 
+
+
+CURRENTLY:
+
+THe issue is that you just need to go through map and organize it so that it works with items. 

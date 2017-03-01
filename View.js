@@ -1,6 +1,6 @@
-import $ from "jquery";
-import _ from "underscore";
-import Backbone from "backbone";
+/*import $ from "jquery";*/
+/*import _ from "underscore";*/
+/*import Backbone from "backbone";*/
 import DirectiveRegistry from "./directive/directiveRegistry.js"
 import Directive from "./directive/directive.js"
 

@@ -1,12 +1,12 @@
 //Same model, collection in same file for now because these modules rely on each other.
 
-import _ from "underscore";
-import Backbone from "backbone";
+/*import _ from "underscore";*/
+/*import Backbone from "backbone";*/
 import Model from "./Model";
 import Collection from "./Collection";
 import View from "./View";
 import DirectiveRegistry from "./directive/directiveRegistry";
-import $ from "jquery";
+/*import $ from "jquery";*/
 
 var Fajita = {Model, Collection, View, DirectiveRegistry};
 Fajita["🌮"] = "0.0.0";

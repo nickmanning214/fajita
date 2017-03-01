@@ -1,0 +1,35 @@
+Common mistake is to misname "childViewImports" as "subViewImports". Check for this.
+
+You don't actually need defaults if you don't have any variables in your template. Fix this.
+
+Also requiring a template is iffy because when you're building the structure of the app and you don't want anything there yet, it will complain.
+
+Error checker for if you forget to nest mappings: Eg you put mappings:{h1Content:pageTitle} instead of mappings {Header:{h1Content:pageTitle}}
+
+Error checker if you accidentally put the global name for a subview instead of the local subview name {FrameHeader:{h1Content:pageTitle}} instead of {Header:{h1Content:pageTitle}}
+
+Include the whole docfrag stuff in your testing.
+
+!!!IMPORTANT!!! You need to be able to have mappings on a class declaration, not just passed as an option on init. That's because sometimes there are default models/collections that have dummy app values as properties and they need to be mapped to template values.
+
+Allow passing models/collections into constructor for models.
+
+Check if you forgot "->" in mappings
+
+Remove tagName from mapped childview and then add to the collection, you see an error dummydiv is not defined
+
+NOTES:
+
+ - You don't want to get in the habit of making subviews just for the sake of it. A subview should be for when you want a view to be embedded as part of many different parent views. Not just to clean up a template.
+ - You need to know more about events and plan accordingly. Events originally didn't work with nm-map. I had to call this.delegateEvents() manually in the directive, probably because the elements had been removed from the dom and reinserted.
+ - How attributes are set on views, and updated with changes, is kind of complicated right now.
+ - The view only listens to the most parent model. Any change in a submodel will bubble up to the parent model and trigger a change in the parent model. I don't see a need right now to improve this aspect.
+ - Perhaps you don't need subViewImports and childViewImports. They can simply be set as default values...no?
+ 
+ 
+ 
+ 
+ TODO: DON'T REQUIRE IT TO BE AN ELEMENT. PROBABLY REQUIRES COMPLETE REFACTOR.
+
+
+ - Making a document fragment be an el is pretty problematic. Once you append it then you lose the reference to any of the elements. Solution: kept this.childNodes reference in View
