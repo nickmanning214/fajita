@@ -1,47 +1,215 @@
+import Backbone from "backbone";
 import Directive from "./directive";
 
 export default Directive.extend({
     name:"subview",
     childInit:function(){
-        if (this.view.mappings && this.view.mappings[this.val]) this.childMappings = this.view.mappings[this.val];
-        this.data = this.view.viewModel.get(this.val);
-        if (this.view.subViewImports[this.val].prototype instanceof Backbone.View) this.ChildConstructor = this.view.subViewImports[this.val];
-        else this.ChildConstructor = this.view.subViewImports[this.val].call(this.view);
+
+        var args = this.val.split(":");
+        var subViewName = args[0];
+         if (args[1]){
+            var subModelName = args[1];
+            var model = this.view.get(subModelName);
+            if (model instanceof Backbone.Model) this.subModel = model;
+            else if (model instanceof Backbone.Collection) this.subCollection = model;
+         }
+        
+        
+         //The JSON object to pass as "mappings" to the subview or the item in the subCollection.
+         //Do not shorten to view.get. view.get gets from the viewModel which contains props and values...not view props and app props
+        this.childMappings = this.view.mappings && this.view.mappings[subViewName];
+
+        //Not shortened to view.get because I'm not sure if it is useful to do so.
+        //view.get gets the app value mapped to the default value, and if not then it gets the default value.
+        //I think you're just overriding defaults with defaults, and nothing fancier than that.
+        this.overrideSubviewDefaultsHash = this.view.defaults && this.view.defaults[subViewName];
+      
+
+        if (this.subCollection){                
+                this.listenTo(this.subCollection,"add",function(){
+                    this.renderAdd();
+                });
+
+                this.listenTo(this.subCollection,"reset",function(){
+                    this.renderReset();
+                })
+
+                this.listenTo(this.subCollection,"remove",function(){
+                    this.renderRemove();
+                });
+
+                this.listenTo(this.subCollection,"sort",function(){
+                    this.renderSort();        
+                });
+
+
+
+                //Map models to childView instances with their mappings
+                this.ChildView = this.view.childViewImports[subViewName];
+                this.childViewOptions = {
+                    mappings:this.childMappings,
+                    collection:this.subCollection,
+                    tagName:this.view.childViewImports[subViewName].prototype.tagName || "subitem",
+                    overrideSubviewDefaultsHash:this.overrideSubviewDefaultsHash
+                };
+                this.childViews = this.subCollection.map(function(childModel,i){
+                    
+                    var childViewOptions = _.extend({},this.childViewOptions,{
+                        model:childModel,
+                        index:i,
+                        lastIndex:this.subCollection.length - i - 1,
+                        overrideSubviewDefaultsHash:this.overrideSubviewDefaultsHash.models[i].attributes,//??
+                    });
+                    
+                    var childview = new this.ChildView(childViewOptions);
+                    //childview._setAttributes(_.extend({}, _.result(childview, 'attributes')));
+                    return childview;
+                }.bind(this));
+
+
+                
+
+
+
+        }
+
+       
+        
+        
+
+        if (!this.subCollection){
+            if (this.view.subViewImports[subViewName].prototype instanceof Backbone.View) this.ChildConstructor = this.view.subViewImports[subViewName];
+            else this.ChildConstructor = this.view.subViewImports[subViewName].call(this.view);
+        }
+        
         
         var options = {};
            
-        if (this.data){
-            _.extend(options,{data:this.data});
+        if (this.overrideSubviewDefaultsHash){
+            _.extend(options,{overrideSubviewDefaultsHash:this.overrideSubviewDefaultsHash});
         }
 
         if (this.childMappings){
             _.extend(options,{
                 mappings:this.childMappings
-                ,el:this.el
+                //,el:this.el The el of the directive should belong to the directive but not the subview itself
             })
         }
-        _.extend(options,{model:this.view.model});
-
-        this.subView = new this.ChildConstructor(options);
-        var classes = _.result(this.subView,"className")
-        if (classes){
-            classes.split(" ").forEach(function(cl){
-                this.subView.el.classList.add(cl)
-            }.bind(this))
-        };
-
-        var attributes = _.result(this.subView,"attributes");
-        if (attributes){
-            _.each(attributes,function(val,name){
-                this.subView.el.setAttribute(name,val)    
-            }.bind(this))
+        
+        var subModel = this.subModel || this.view.model;
+        if (subModel){
+            _.extend(options,{model:subModel});
         }
-        
-        this.subView.parent = this.view;
-        this.subView.parentDirective = this;
-        
+
+        if (!this.subCollection){
+            this.subView = new this.ChildConstructor(options);
+            var classes = _.result(this.subView,"className")
+            if (classes){
+                classes.split(" ").forEach(function(cl){
+                    this.subView.el.classList.add(cl)
+                }.bind(this))
+            };
+
+            var attributes = _.result(this.subView,"attributes");
+            if (attributes){
+                _.each(attributes,function(val,name){
+                    this.subView.el.setAttribute(name,val)    
+                }.bind(this))
+            }
+            
+            this.subView.parent = this.view;
+            this.subView.parentDirective = this;
+        }
+        this.optionsSentToSubView = options;
     },
     build:function(){
-        this.$el.replaceWith(this.subView.el);
+        if (!this.subCollection){
+            this.$el.replaceWith(this.subView.el);
+        }
+        else{
+            var $children = $();
+            this.childViews.forEach(function(childView,i){
+                $children = $children.add(childView.el)
+                childView.index = i;
+            }.bind(this));
+            if ($children.length) {
+                this.$el.replaceWith($children);
+                this.childViews.forEach(function(childView,i){
+                    childView.delegateEvents();
+                })
+                this.$parent = $children.parent()
+            }
+            else{
+                this.$parent = this.$el.parent();
+            }
+            this.$children = $children
+        }
+    },
+    renderAdd:function(){
+        var children = [];
+        this.subCollection.each(function(model,i){
+            var existingChildView = this.childViews.filter(function(childView){
+                return childView.model == model
+            })[0];
+            if (existingChildView) {
+                children.push(existingChildView.el)
+                //var attributes = _.extend({}, _.result(existingChildView, 'attributes'))
+                //existingChildView._setAttributes(attributes);
+            }
+            else {
+                var newChildView = new this.ChildView({
+                    model:model,
+                    mappings:this.childMappings,
+                    index:i,
+                    lastIndex:this.subCollection.length - i - 1,
+                    collection:this.subCollection,
+                    data:this.view.get(this.val.split(":")[0])[i]
+                })
+                this.childViews.push(newChildView);
+                children.push(newChildView.el)
+            }
+            
+        }.bind(this))
+        this.$parent.empty();
+        children.forEach(function(child){
+            this.$parent.append(child)
+        }.bind(this))
+        this.$children = $(children)
+        
+        this.childViews.forEach(function(childView,i){
+            childView.delegateEvents();
+        })
+
+    },
+    renderReset:function(){
+        this.$parent.empty();
+    },
+    renderRemove:function(){
+        this.$children.last().remove();
+        this.childViews.splice(-1,1);
+        this.$children = this.$parent.children();
+    },
+    renderSort:function(){
+        
+        //Don't need this (now). Models will already be sorted on add with collection.comparator = xxx;
+    },
+    test:function(){
+        //this.view is instance of the view that contains the subview directive.
+        //this.subView is instance of the subview
+        //this is the directive.
+
+        if (this.subView){
+            //why parentNode?
+            return this.view.el.contains(this.subView.el.parentNode);
+        }
+        else{
+            var pass = true;
+            var el = this.view.el
+            this.$children.each(function(){
+                if (!el.contains(this)) pass = false;
+            })
+           return pass;
+            
+        }
     }
 })

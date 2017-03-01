@@ -41,6 +41,7 @@ export default Directive.extend({
                 data:this.view.viewModel.get(this.val.split(":")[0])[i],
                 tagName:this.el.tagName
             });
+            childview._setAttributes(_.extend({}, _.result(childview, 'attributes')));
             return childview;
         }.bind(this));
 
@@ -52,6 +53,9 @@ export default Directive.extend({
         }.bind(this));
         if ($children.length) {
             this.$el.replaceWith($children);
+            this.childViews.forEach(function(childView,i){
+                childView.delegateEvents();
+            })
             this.$parent = $children.parent()
         }
         else{
@@ -89,7 +93,11 @@ export default Directive.extend({
             this.$parent.append(child)
         }.bind(this))
         this.$children = $(children)
-                
+        
+        this.childViews.forEach(function(childView,i){
+            childView.delegateEvents();
+        })
+
     },
     renderReset:function(){
         this.$parent.empty();

@@ -1,14 +1,9 @@
+//Why does underscore work here?
+
 import Directive from "./directive";
 
 export default Directive.extend({
     name:"enable",
-    childInit:function(){
-        this.result = this.view.mappings[this.val].call(this.view);
-        this.listenTo(this.view.viewModel,"change",function(){
-            this.result = this.view.mappings[this.val].call(this.view);
-            this.render();
-        });
-    },
     build:function(){
         if (!this.result) $(this.el).prop("disabled",true);
         else $(this.el).prop("disabled","");
@@ -16,5 +11,8 @@ export default Directive.extend({
     render:function(){
         if (!this.result) $(this.el).prop("disabled",true);
         else $(this.el).prop("disabled","");
+    },
+    test:function(value){
+        return $(this.el).prop("disabled")!=value;
     }
 });

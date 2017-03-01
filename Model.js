@@ -19,23 +19,6 @@ export default Backbone.Model.extend({
     this.init();
   },
   init:function(){},
-  registerSubModel:function(prop,model){
-    this.subModels[prop] = model;
-    model.parentModels.push(this);
-
-    this.listenTo(model,"change",function(model,options){
-      
-      this.trigger("change");
-      
-      /* TODO: invent entire system for traversing and firing events. Probably not worth the effort for now.
-      Object.keys(model.changedAttributes()).forEach(function(key){
-        this.trigger("change:"+prop+"."+key)
-      }.bind(this));
-      */
-
-
-    });
-  },
   registerSubCollection:function(prop,collection){
     if (_.isArray(collection)) collection = new Base.Collection(collection);
     else if (!(collection instanceof Backbone.Collection)) collection = new Base.Collection(_.toArray(collection))
@@ -69,12 +52,35 @@ export default Backbone.Model.extend({
    
    
   },
-  
+  toggle:function(key,val1,val2){
+    if (this.get(key)==val2){
+      this.set(key,val1);
+    }
+    else this.set(key,val2);
+  },
   set:function(key, val, options){
       //my code
       if (_.isString(key) && key.startsWith("->")) {
-        if (_.isArray(val)) this.structure[key.substr(2)] = new Fajita.Collection(val)
-        else if (_.isObject(val)) this.structure[key.substr(2)] = new Fajita.Model(val);
+
+        var modelOrCollection = (_.isArray(val))?new Fajita.Collection(val):new Fajita.Model(val);
+        modelOrCollection.parentModels.push(this);
+        this.structure[key.substr(2)] = modelOrCollection;
+        
+        
+        this.listenTo(modelOrCollection,"change add",function(modelOrCollection,options){
+
+            this.trigger("change");
+            
+            /* TODO: invent entire system for traversing and firing events. Probably not worth the effort for now.
+            Object.keys(model.changedAttributes()).forEach(function(key){
+              this.trigger("change:"+prop+"."+key)
+            }.bind(this));
+            */
+
+
+          });
+
+       
       }
       else {
         Backbone.Model.prototype.set.call(this,...arguments);

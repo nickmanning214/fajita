@@ -1,32 +1,27 @@
 import $ from "jquery";
 import _ from "underscore";
 import Backbone from "backbone";
-import Directive from "./directive/directive";
-import DirectiveContent from "./directive/directive-content";
-import DirectiveEnable from "./directive/directive-enable";
-import DirectiveHref from "./directive/directive-href";
-import DirectiveMap from "./directive/directive-map";
-import DirectiveOptional from "./directive/directive-optional";
-import DirectiveOptionalWrap from "./directive/directive-optionalwrap";
-import DirectiveSrc from "./directive/directive-src";
-import DirectiveSubview from "./directive/directive-subview";
+import DirectiveRegistry from "./directive/directiveRegistry.js"
+import Directive from "./directive/directive.js"
 
-_.extend(Directive,{
-    Content:DirectiveContent,
-    Enable:DirectiveEnable,
-    Href:DirectiveHref,
-    Map:DirectiveMap,
-    Optional:DirectiveOptional,
-    OptionalWrap:DirectiveOptionalWrap,
-    Src:DirectiveSrc,
-    Subview:DirectiveSubview
-})
 
 
 var backboneViewOptions = ['model', 'collection', 'el', 'id', 'attributes', 'className', 'tagName', 'events'];
-var additionalViewOptions = ['mappings','templateString','childViewImports','subViewImports','index','lastIndex']
+var additionalViewOptions = ['mappings','templateString','childViewImports','subViewImports','index','lastIndex','overrideSubviewDefaultsHash']
 export default Backbone.View.extend({
+    textNodesUnder:function(){
+        //http://stackoverflow.com/questions/10730309/find-all-text-nodes-in-html-page
+        var n, a=[], walk=document.createTreeWalker(this.el,NodeFilter.SHOW_TEXT,null,false);
+        while(n=walk.nextNode()) a.push(n);
+        return a;
+        
+    },
     constructor:function(options) {
+
+        _.each(_.difference(_.keys(options),_.union(backboneViewOptions,additionalViewOptions)),function(prop){
+            console.warn("Warning! Unknown property "+prop);
+        })
+
 
         if (!this.jst && !this.templateString) throw new Error("You need a template");
         if (!this.jst){
@@ -36,16 +31,25 @@ export default Backbone.View.extend({
         else{
             this.cid = _.uniqueId('view');
         }
-        
         _.extend(this, _.pick(options, backboneViewOptions.concat(additionalViewOptions)));
 
         //Add this here so that it's available in className function
         if (!this.defaults) {
             console.error("You need defaults for your view");
-            debugger;
         }
-        this.data = options && options.data;
-        var attrs = _.extend(_.clone(this.defaults),(options && options.data) || {})
+
+        _.each(this.defaults,function(def){
+            if (_.isFunction(def)) console.warn("Defaults should usually be primitive values")
+        })
+
+        //data is passed in on subviews
+        // comes from this.view.viewModel.get(this.val);, 
+        //so if the directive is nm-subview="Menu", then this.data should be...what?
+        //Aha! data is to override default values for subviews being part of a parent view. 
+        //But it is not meant to override mappings I don't think.
+        this.overrideSubviewDefaultsHash = options && options.overrideSubviewDefaultsHash;
+
+        var attrs = _.extend(_.clone(this.defaults),(options && options.overrideSubviewDefaultsHash) || {})
         this.viewModel = new Backbone.Model(attrs);
 
 
@@ -79,11 +83,14 @@ export default Backbone.View.extend({
 
         this._ensureElement();
         this.buildInnerHTML();
-        this.initDirectives();
+        
+
+
+        this.initDirectives();//init simple directives...the ones that just manipulate an element
         this.delegateEvents();
         
         
-
+        this.childNodes = [].slice.call(this.el.childNodes, 0);
 
         this.initialize.apply(this, arguments);
     },
@@ -99,6 +106,7 @@ export default Backbone.View.extend({
         else return this.mappings[attr].call(this)
     },
     updateContextObject:function(model){
+
 
         var obj = {}
         
@@ -126,7 +134,7 @@ export default Backbone.View.extend({
     buildInnerHTML:function(){
         if (this.$el) this.$el.html(this.renderedTemplate());
         else {
-            dummydiv = document.createElement("div");
+            var dummydiv = document.createElement("div");
             dummydiv.innerHTML = this.renderedTemplate();
             while(dummydiv.childNodes.length){
                 this.el.appendChild(dummydiv.childNodes[0]);
@@ -136,26 +144,95 @@ export default Backbone.View.extend({
     },
     initDirectives:function(){
 
-        this.directives = {};
+        
+         //Init directives involving {{}}
 
-        for (var directiveName in Directive){
-            var __proto = Directive[directiveName].prototype
+        this._initialTextNodes = this.textNodesUnder();
+        this._subViewElements = [];
+        this._initialTextNodes.forEach(function(fullTextNode){
+            //http://stackoverflow.com/a/21311670/1763217 textContent seems right
+
+            var re = /\{\{(.+?)\}\}/g;
+            var match;
+            
+
+
+            var matches = [];
+            while ((match = re.exec(fullTextNode.textContent)) != null) {
+                matches.push(match)
+            }
+
+            var currentTextNode = fullTextNode;
+            var currentString = fullTextNode.textContent;
+            var prevNodesLength = 0;
+
+            matches.forEach(function(match){
+                var varNode = currentTextNode.splitText(match.index - prevNodesLength);
+                var entireMatch = match[0]
+                varNode.match = match[1];
+                this._subViewElements.push(varNode);
+                currentTextNode = varNode.splitText(entireMatch.length)
+                currentString = currentTextNode.textContent;
+                
+                
+                prevNodesLength=match.index + entireMatch.length;//Note: This works accidentally. Might be wrong.
+            }.bind(this))
+           
+
+        }.bind(this));
+        
+        
+        
+        this.directive = {};
+
+        for (var directiveName in DirectiveRegistry){
+            var __proto = DirectiveRegistry[directiveName].prototype
             if (__proto instanceof Directive){ //because foreach will get more than just other directives
                 var name = __proto.name;
-                var elements = (this.$el)?$.makeArray(this.$el.find("[nm-"+name+"]")):$.makeArray($(this.el.querySelectorAll("[nm-"+name+"]")));
+                if (name!=="subview"){
+                    var elements = (this.$el)?$.makeArray(this.$el.find("[nm-"+name+"]")):$.makeArray($(this.el.querySelectorAll("[nm-"+name+"]")));
                 
-                
-                if (elements.length) {
-                    this.directives[name] = elements.map(function(element,i,elements){
-                        //on the second go-around for nm-map, directiveName somehow is called "SubView"
-                        return new Directive[directiveName]({
+                    if (elements.length) {
+                        this.directive[name] = elements.map(function(element,i,elements){
+                            //on the second go-around for nm-map, directiveName somehow is called "SubView"
+                            return new DirectiveRegistry[directiveName]({
+                                view:this,
+                                el:element
+                            });
+                        }.bind(this)); 
+                    }
+                }
+                else{
+                    this.directive["subview"] = this._subViewElements.map(function(subViewElement,i,subViewElements){
+                        return new DirectiveRegistry["Subview"]({
                             view:this,
-                            el:element
+                            el:subViewElement
                         });
                     }.bind(this)); 
                 }
+                
             }
         }
+
+
+
+
+       
+        /*
+        this._subViewElements.forEach(function(subViewElement){
+            var args = subViewElement.match.split(":");
+            if (args.length==1){
+                //subview with no context obj
+            }else{
+                //Check for collection or model passed.
+            }
+
+
+            var element = document.createElement("span");
+            element.style.background="yellow";
+            element.innerHTML = subViewElement.match;
+            subViewElement.parentNode.replaceChild(element,subViewElement);
+        })*/
 
        
 
@@ -204,20 +281,26 @@ export default Backbone.View.extend({
     subViewImports:{},
     childViewImports:{},
       _ensureElement: function() {
-        //Overriding this to support document fragments
-      if (!this.el) {
-          if(this.attributes || this.id || this.className || this.tagName){//if you have any of these backbone properties, do backbone behavior
-                var attrs = _.extend({}, _.result(this, 'attributes'));
-                if (this.id) attrs.id = _.result(this, 'id');
-                if (this.className) attrs['class'] = _.result(this, 'className');
-                this.setElement(this._createElement(_.result(this, 'tagName') || 'div'));
-                this._setAttributes(attrs);
-          }
-          else{//however, default to this.el being a documentfragment (makes this.el named improperly but whatever)
-              this.el = new DocumentFragment();
-          }
-      } else {
-        this.setElement(_.result(this, 'el'));
-      }
+                //Overriding this to support document fragments
+            if (!this.el) {
+                if(this.attributes || this.id || this.className || this.tagName){//if you have any of these backbone properties, do backbone behavior
+                        var attrs = _.extend({}, _.result(this, 'attributes'));
+                        if (this.id) attrs.id = _.result(this, 'id');
+                        if (this.className) attrs['class'] = _.result(this, 'className');
+                        this.setElement(this._createElement(_.result(this, 'tagName') || 'div'));
+                        this._setAttributes(attrs);
+                }
+                else{//however, default to this.el being a documentfragment (makes this.el named improperly but whatever)
+                    this.el = document.createDocumentFragment();
+                }
+            } else {
+                this.setElement(_.result(this, 'el'));
+            }
+    },
+    set:function(obj){
+        this.viewModel.set(obj);
+    },
+    get:function(prop){
+        return this.viewModel.get(prop)
     }
 });

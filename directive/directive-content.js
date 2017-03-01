@@ -1,19 +1,22 @@
 import Directive from "./directive";
 
+//Note: Don't use .html() or .attr() jquery. It's weird with different types.
 export default Directive.extend({
     name:"content",
-    childInit:function(){
-        this.content = this.view.viewModel.get(this.val);
-        this.listenTo(this.view.viewModel,"change:"+this.val,function(){
-            this.content = this.view.viewModel.get(this.val);
-            this.render();
-        })
-    },
     build:function(){
-       
-        this.$el.html(this.content)
+        if (this.$el.prop("tagName")=="IMG") this.el.setAttribute("title",this.result)
+        else this.el.innerHTML = this.result;
     },
     render:function(){
-        this.$el.html(this.content)
+        this.build();
+    },
+    test:function(value){
+        var pass = false;
+        if (this.$el.prop("tagName")=="IMG") {
+            if (this.el.getAttribute("title")==value + "") pass = true;
+        }
+        else if (this.el.innerHTML==value+"") pass = true;
+        
+        return pass;
     }
 });

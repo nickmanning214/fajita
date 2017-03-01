@@ -4,7 +4,8 @@
   "description": "A custom extension of Backbone.js, providing deep models, directives, and other features.",
   "main": "Base.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/.bin/intern-client config=tests/intern",
+    "rollup": "./node_modules/.bin/rollup -c --watch"
   },
   "author": "Nick Manning",
   "license": "ISC",
@@ -14,6 +15,7 @@
     "rollup": "^0.41.4",
     "rollup-plugin-commonjs": "^7.0.0",
     "rollup-plugin-node-resolve": "^2.0.0",
-    "rollup-plugin-uglify": "^1.0.1"
+    "rollup-plugin-uglify": "^1.0.1",
+    "rollup-watch": "^3.2.2"
   }
 }

@@ -8,14 +8,266 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
     </head>
     <body>
-       
+       <ol id="tests">
+            
+
+
+       </ol>
         <script src="./fajita.js"></script>
+        <script src="./node_modules/jquery/dist/jquery.js"></script>
+        <script src="./node_modules/underscore/underscore.js"></script>
         <script>
+
+
+            var tests = {
+                "test-default-view-value":function(){
+
+
+                     var View = Fajita.View.extend({
+                        templateString:"<p nm-content='content'></p>",
+                        defaults:{
+                            content:"Default content"
+                        },
+                        tagName:"div"
+                    });
+
+                    var view = new View();
+
+                    return view.el
+                
             
-            var App = Fajita.Model.extend({});
+                },
+                "test-mappings":function(){
+                    
+
+                    var View = Fajita.View.extend({
+                        templateString:"<p nm-content='content'></p>",
+                        defaults:{
+                            content:"Default content"
+                        },
+                        tagName:"div"
+                    });
+
+                    var app = new Fajita.Model({
+                        prop:"app prop value"
+                    });
+
+                    var view = new View({
+                        model:app,
+                        mappings:{
+                            content:"prop"
+                        }
+                    });
+
+                    return view.el;
+
+
+                },
+                "test-change-app-outside-of-view":function(){
+
+
+
+
+                    var View = Fajita.View.extend({
+                        templateString:"<p nm-content='content'></p><button>Click</button>",
+                        defaults:{
+                            content:"Click to change the content"
+                        },
+                        tagName:"div",
+                        events:{
+                            "click button":function(e){
+                                $(e.target).remove();
+                                app.set({prop:"Content Changed"})
+                                
+                                //Maybe:
+                                //app.toggle("prop","Click to change the content","Content Changed")
+                            }
+                        }
+                    });
+
+                    var app = new Fajita.Model({
+                        prop:"Click to change the content"
+                    });
+
+                    var view = new View({
+                        model:app,
+                        mappings:{
+                            content:"prop"
+                        }
+                    });
+                    
+                    return view.el
+
+
+
+                },
+                "test-deep-model-change":function(){
+
+                    var app = new Fajita.Model({
+                        prop:"Click to change the content"
+                    });
+
+                     var View = Fajita.View.extend({
+                        templateString:"<p nm-content='content'></p><button>Click</button>",
+                        defaults:{
+                            content:"Click to change the content"
+                        },
+                        tagName:"div",
+                        events:{
+                            "click button":function(e){
+                                $(e.target).remove();
+                                app.get("->subModel").set({subProp:"Content Changed"})
+                                //For some reason the content in the DOM isn't changing though.
+                            }
+                        }
+                    });
+
+                    
+
+                    app.set("->subModel",{subProp:"Click to change the content"})
+
+                    var view = new View({
+                        model:app,
+                        mappings:{
+                            content:function(){
+                                return app.get("->subModel").get("subProp")
+                            }
+                        }
+                    });
+                    
+                    return view.el
+
+                },
+                "test-href":function(){
+                     var BaseView = Fajita.View.extend({
+                        templateString:"<h1 nm-href='href'>Header Link</h1>",
+                        defaults:{
+                            href:"http://www.google.com/"
+                        },
+                        tagName:"div"
+                    });
+                    var app = new Fajita.Model({
+                        linkywink:"http://www.yahoo.com/"
+                    })
+                    window.app = app;
+            var view = new BaseView({
+                model:app,
+                mappings:{
+                    href:"linkywink"
+                }
+            });
+            return view.el
+            /*
+            expect(view.$el.find("[nm-href]").parent()[0].tagName).to.equal("A");
+            expect(view.$el.find("[nm-href]").parent().prop("href")).to.equal("http://www.yahoo.com/");
+            app.set({linkywink:"http://www.bing.com/"})
+            alert(view.$el.find("[nm-href]").parent()[0].outerHTML)
+            expect(view.$el.find("[nm-href]").parent().prop("href")).to.equal("http://www.bing.com/");*/
+                },
+                "test-map":function(){
+                    
+                    var ItemView = Fajita.View.extend({
+                        templateString:"<p nm-content='content'></p>",
+                        tagName:"div",
+                        defaults:{}
+                    });
+
+                    var BaseView = Fajita.View.extend({
+                        tagName:"ol",
+                        templateString:"<li nm-map='items:Item'></li>",
+                        defaults:{
+                            items:new Fajita.Collection([
+                                {name:"Nick"},
+                                {name:"George"},
+                                {name:"Bob"}
+                            ])
+                        },
+                        childViewImports:{
+                            Item:ItemView
+                        }
+                    });
+
+                    var view = new BaseView({
+                        mappings:{
+                            Item:{
+                                content:"name"
+                            }
+                        }
+                    });
+
+                    
+
+                    return view.el 
+                },
+                "test-map-2":function(){
+                    
+                    var ItemView = Fajita.View.extend({
+                        templateString:"<p nm-content='content'></p>",
+                        tagName:"li",
+                        defaults:{}
+                    });
+
+                    var BaseView = Fajita.View.extend({
+                        tagName:"ol",
+                        templateString:"<li nm-map='items:Item'></li>",
+                        defaults:{
+                            items:new Fajita.Collection([
+                                {name:"Nick"},
+                                {name:"George"},
+                                {name:"Bob"}
+                            ])
+                        },
+                        childViewImports:{
+                            Item:ItemView
+                        }
+                    });
+
+                    var app = new Fajita.Model;
+                    app.set("->people",[
+                        {name:"Clyde"},
+                        {name:"Roofus"},
+                        {name:"Timmy"}]
+                    );
+
+                    var view = new BaseView({
+                        model:app,
+                        mappings:{
+                            items:"->people",
+                            Item:{
+                                content:"name"
+                            }
+                        }
+                    });
+
+                    //new test
+                    app.get("->people").add({name:"Bartholomew"})
+
+                    //new test
+                    app.get("->people").comparator = "name";
+                    app.get("->people").add({name:"Carlos"})
+
+                    window.app = app;
+
+                    return view.el 
+                }
+
+            };
+
+
+
+
+            var $tests = $("#tests");
+            _.each(tests,function(test,name){
+                $tests.append(_.template("<li id='<%= name%>'></li>")({name:name}))
+                $("#"+name).html(test());
+            })
             
-            var app = new App();
-            app.set("->")
+            
+
+
+           // $("#main").html(view.el);
+
+            //app.set({prop:"How is it going bro?"})
 
         </script>
     </body>

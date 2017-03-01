@@ -3,14 +3,7 @@ import Directive from "./directive";
 export default Directive.extend({
     name:"optionalwrap",
     childInit:function(){
-       this.result = this.view.viewModel.get(this.val);
-
-
-        //The viewmodel of the featurepanel is updated when the model changes.
-        this.listenTo(this.view.viewModel,"change:"+this.val,function(){
-            this.result = this.view.viewModel.get(this.val);
-            this.render();
-        })
+        Directive.prototype.childInit.call(this,arguments);
         
         this.wrapper = this.el;
         this.childNodes = [].slice.call(this.el.childNodes, 0);
@@ -35,5 +28,13 @@ export default Directive.extend({
                 this.wrapper.appendChild(this.childNodes[i])
             }
         }
+    },
+    test:function(value){
+
+
+        return (this.childNodes[0].parentNode==this.wrapper) == value;
+
+
+      
     }
 })
