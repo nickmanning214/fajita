@@ -22,6 +22,15 @@ describe('Fajita.Model', function() {
         //And you can get it with "get"
         expect(app.get("->testModel")).to.be.instanceof(Fajita.Model);
 
+        //Fire a change event on submodel
+        var changed = false;
+        app.on("change",function(){
+            changed = true;
+        });
+
+        expect(changed).to.be.false;
+        app.get("->testModel").set({a:6});
+        expect(changed).to.be.true;
     });
 
     it('should be able to "set" and "get" a subcollection using arrow syntax (to do: and maintain a flat attributes hash)', function() {
