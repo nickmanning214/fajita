@@ -3,19 +3,7 @@
 
 
 export default Backbone.Model.extend({
-  constructor:function (attributes, options) {
-    var attrs = attributes || {};
-    options || (options = {});
-    this.cid = _.uniqueId(this.cidPrefix);
-    this.attributes = {};
-    if (options.collection) this.collection = options.collection;
-    if (options.parse) attrs = this.parse(attrs, options) || {};
-    var defaults = _.result(this, 'defaults');
-    attrs = _.defaults(_.extend({}, defaults, attrs), defaults);
-    this.set(attrs, options);
-    this.changed = {};
-    this.initialize.apply(this, arguments);
-  },
+  
   initialize:function(options){
     if ( typeof URLSearchParams !== "undefined" ){
       this.query = new URLSearchParams(window.location.search);
