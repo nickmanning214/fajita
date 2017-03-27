@@ -36,9 +36,9 @@ describe("all-directives",function(){
             <div nm-optionalwrap='optionalwrap' style='background:yellow'><span>nm-optionalwrap='optionalwrap'</span><span nm-content='optionalwrap'></span></div>
             <div nm-optionalwrap='optionalwrap2' style='background:green'><span>nm-optionalwrap='optionalwrap2'</span><span nm-content='optionalwrap2'></span></div>
         <li>
-            {{SubCollection:collection}}
+            SubCollection:{{SubCollection:collection}}
         <li>
-            {{SubView}}
+            SubView:{{SubView}}
         </ul>
     `;
 
@@ -60,17 +60,20 @@ describe("all-directives",function(){
         },
 
         //error that this needs to be written twice.
-
+        //Should it be used with the view key or with the collection key?
+        //If view key, then it matches with the API for submodels.
+        //
         SubCollection:new Fajita.Collection([
             {a:1,b:2},
             {a:1,b:2},
             {a:1,b:2}
         ]),
+        /*
         collection:new Fajita.Collection([
             {a:1,b:2},
             {a:1,b:2},
             {a:1,b:2}
-        ])
+        ])*/
     };
    
    
@@ -82,13 +85,22 @@ describe("all-directives",function(){
         }
     })
 
+    MyTinyView = Fajita.View.extend({
+        tagName:"p",
+        templateString:"Four score and seven years ago...",
+        defaults:{}
+    })
+
    MySubView = Fajita.View.extend({
         tagName:"subview",
-        templateString:templateString.replace(/\{\{[^\}]+\}\}/g,""),
+        templateString:templateString.replace(/\{\{[^\}]+\}\}/g,"{{AnotherSubView}}"),
         defaults:_.extend({},defaults,{
             content:"This is the default content for the subview.",
             SubView:undefined
-        })
+        }),
+        subViewImports:{
+            AnotherSubView:MyTinyView
+        }
     })
 
      HugeView = Fajita.View.extend({
@@ -293,7 +305,7 @@ describe("all-directives",function(){
             }
         });
         $sandbox.append(viewFunctions.el);
-       var directiveArrays = _.omit(viewFunctions.directive,"subview");
+       var directiveArrays = _.omit(viewFunctions.directive,["subview","map"]);
         _.each(directiveArrays,function(directiveArray){
             _.each(directiveArray,function(directiveInstance){
                 expect(directiveInstance.test(viewFunctions.mappings[directiveInstance.val].call(viewFunctions))).to.be.true

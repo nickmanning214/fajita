@@ -1,3 +1,4 @@
+
 function getSuite(title){
     return mocha.suite.suites.filter(suite=>{return suite.title===title})[0]
 }
@@ -17,35 +18,6 @@ MenuItem = Fajita.View.extend({
 
 
 
-describe("Fajita.View", function() {
-    var BaseView = Fajita.View.extend({
-        templateString: "Just a string",
-        defaults: {}
-    });
-
-  
-    it('should be able to be a view without a wrapper element', function() {
-        var view = new BaseView();
-        var div = document.createElement("div");
-        $sandbox.append(div);
-        div.appendChild(view.el);
-        expect(div.childNodes[0].textContent).to.equal("Just a string")
-    });
-
-    var BaseView2 = Fajita.View.extend({
-        //templateString: "<h1>Just {{Subview}}</h1><p>{{Subview:model}} {{ItemView:collection}}</p>",
-        templateString:"<h1>Just {{Subview}}</h1>",
-        defaults: {},
-        subViewImports:{
-            Subview:BaseView
-        }
-    });
-    it('should be able to handle curly brace syntax',function(){
-
-    })
-
-    this.BaseView = BaseView2;
-});
 
 
 
@@ -567,63 +539,7 @@ describe('nm-data', function() {
     })
 });
 
-describe('Fajita.Model', function() {
 
-    var App = Fajita.Model.extend({});
-    var app = new App();
-
-    it('should be able to set and get a primitive value', function() {
-        console.log(this.parent)
-        app.set({
-            a: 3
-        });
-        expect(app.get("a")).to.equal(3);
-    }.bind(this));
-
-    it('should be able to register a submodel', function() {
-        //setup
-        var a = 5;
-        app.set("->testModel", {
-            a: 5
-        });
-        //Do not set it to attributes property.
-        expect(app.attributes.testModel).to.be.undefined;
-        expect(app.attributes["->testModel"]).to.be.undefined;
-
-        //Make sure you got rid of the arrow
-        expect(app.structure["->testModel"]).to.be.undefined;
-
-        //testModel was set to the structure object
-        expect(app.structure.testModel).to.be.instanceof(Fajita.Model);
-
-        //And you can get it with "get"
-        expect(app.get("->testModel")).to.be.instanceof(Fajita.Model);
-
-    });
-
-    it('should be able to register a subcollection', function() {
-        //setup
-        var app = new App();
-        var a = 6
-        app.set("->testCollection", [{
-            a: 6
-        }]);
-        //Do not set it to attributes property.
-        expect(app.attributes.testCollection).to.be.undefined;
-        expect(app.attributes["->testCollection"]).to.be.undefined;
-
-        //Make sure you got rid of the arrow
-        expect(app.structure["->testCollection"]).to.be.undefined;
-
-        //testModel was set to the structure object
-        expect(app.structure.testCollection).to.be.instanceof(Fajita.Collection);
-
-        //And you can get it with "get"
-        expect(app.get("->testCollection")).to.be.instanceof(Fajita.Collection);
-
-    });
-
-});
 
 
 

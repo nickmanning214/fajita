@@ -17,6 +17,8 @@ export default Backbone.View.extend({
         
     },
     constructor:function(options) {
+         //debugger;
+
 
         _.each(_.difference(_.keys(options),_.union(backboneViewOptions,additionalViewOptions)),function(prop){
             console.warn("Warning! Unknown property "+prop);
@@ -50,6 +52,7 @@ export default Backbone.View.extend({
         this.overrideSubviewDefaultsHash = options && options.overrideSubviewDefaultsHash;
 
         var attrs = _.extend(_.clone(this.defaults),(options && options.overrideSubviewDefaultsHash) || {})
+        console.log(this.overrideSubviewDefaultsHash,attrs)
         this.viewModel = new Backbone.Model(attrs);
 
 
@@ -78,6 +81,16 @@ export default Backbone.View.extend({
         
             this.updateContextObject(this.model);
         }
+
+        var attrs = this.viewModel.attributes;
+        var keys = Object.keys(this.viewModel.attributes);
+        keys.forEach(function(key){
+            if (key==="definitions" && !this.viewModel.attributes[key]){
+                //problem is that propMap (seems to be mappings with functions filtered out) is 
+                //{definitions:"definitions"}. Comes from article_article.js
+                debugger;
+            }
+        }.bind(this));
         
 
 
@@ -107,7 +120,7 @@ export default Backbone.View.extend({
     },
     updateContextObject:function(model){
 
-
+        
         var obj = {}
         
         //Change templateVars->modelVars to templateVars->model.get("modelVar"), and set on the model
@@ -185,11 +198,14 @@ export default Backbone.View.extend({
         
         this.directive = {};
 
+       
+
+
         for (var directiveName in DirectiveRegistry){
             var __proto = DirectiveRegistry[directiveName].prototype
             if (__proto instanceof Directive){ //because foreach will get more than just other directives
                 var name = __proto.name;
-                if (name!=="subview"){
+                if (name!=="subview" && name!=="map"){
                     var elements = (this.$el)?$.makeArray(this.$el.find("[nm-"+name+"]")):$.makeArray($(this.el.querySelectorAll("[nm-"+name+"]")));
                 
                     if (elements.length) {
@@ -197,24 +213,45 @@ export default Backbone.View.extend({
                             //on the second go-around for nm-map, directiveName somehow is called "SubView"
                             return new DirectiveRegistry[directiveName]({
                                 view:this,
-                                el:element
+                                el:element,
+                                val:element.getAttribute("nm-"+name)
                             });
                         }.bind(this)); 
                     }
                 }
                 else{
+                    /*
                     this.directive["subview"] = this._subViewElements.map(function(subViewElement,i,subViewElements){
                         return new DirectiveRegistry["Subview"]({
                             view:this,
                             el:subViewElement
                         });
-                    }.bind(this)); 
+                    }.bind(this)); */
                 }
                 
             }
         }
 
 
+         this._subViewElements.forEach(function(subViewElement){
+            var args = subViewElement.match.split(":");
+            if (args.length==1){
+                if (!this.directive["subview"]) this.directive["subview"] = [];
+                this.directive["subview"].push(new DirectiveRegistry["Subview"]({
+                    view:this,
+                    el:subViewElement,
+                    val:subViewElement.match
+                }));
+            }
+            else{
+                if (!this.directive["map"]) this.directive["map"] = [];
+                this.directive["map"].push(new DirectiveRegistry["Map"]({
+                    view:this,
+                    el:subViewElement,
+                    val:subViewElement.match
+                }));
+            }
+        }.bind(this))
 
 
        
