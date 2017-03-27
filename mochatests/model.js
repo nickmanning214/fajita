@@ -3,7 +3,7 @@ describe('Fajita.Model', function() {
     var App = Fajita.Model.extend({});
     var app = new App();
 
-    it('should be able to register a submodel', function() {
+    it('should be able to "set" and "get" a submodel using arrow syntax (to do: and maintain a flat attributes hash)', function() {
         //setup
         var a = 5;
         app.set("->testModel", {
@@ -24,7 +24,7 @@ describe('Fajita.Model', function() {
 
     });
 
-    it('should be able to register a subcollection', function() {
+    it('should be able to "set" and "get" a subcollection using arrow syntax (to do: and maintain a flat attributes hash)', function() {
         //setup
         var app = new App();
         var a = 6
