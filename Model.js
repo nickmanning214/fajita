@@ -31,7 +31,7 @@ export default Backbone.Model.extend({
         return model;
       }
     }
-      else{
+    else{
       var get = Backbone.Model.prototype.get.apply(this,arguments);
       if (!_.isUndefined(get)) return get;
     }
@@ -47,33 +47,51 @@ export default Backbone.Model.extend({
     }
     else this.set(key,val2);
   },
-  set:function(key, val, options){
-      //my code
-      if (_.isString(key) && key.startsWith("->")) {
-
-        var modelOrCollection = (_.isArray(val))?new Fajita.Collection(val):new Fajita.Model(val);
-        modelOrCollection.parentModels.push(this);
-        this.structure[key.substr(2)] = modelOrCollection;
-        
-        
-        this.listenTo(modelOrCollection,"change add",function(modelOrCollection,options){
-
-            this.trigger("change");
+  set:function(attr, val, options){
+   
+    /*
+    get code...I want set code to mirror get code
+    */
+    if (_.isString(attr)){
+      var props = attr.split("->");
+      if (props.length > 1){
+        var model = this;
+        props.slice(1).forEach(function(prop,i,props){
+          if (model.structure[prop]) model = model.structure[prop];
+          else {
+            var newModel;
+            if (i < props.length - 1){
+              newModel = new Fajita.Model;   
+            }
+            else{
+              newModel = (_.isArray(val))?new Fajita.Collection(val):new Fajita.Model(val);
+            }
+            newModel.parentModels.push(model);
+            model.structure[prop] = newModel;
+            model.listenTo(newModel,"change add",function(newModel,options){
+              this.trigger("change");
             
-            /* TODO: invent entire system for traversing and firing events. Probably not worth the effort for now.
-            Object.keys(model.changedAttributes()).forEach(function(key){
-              this.trigger("change:"+prop+"."+key)
-            }.bind(this));
-            */
+              /* TODO: invent entire system for traversing and firing events. Probably not worth the effort for now.
+              Object.keys(model.changedAttributes()).forEach(function(key){
+                this.trigger("change:"+prop+"."+key)
+              }.bind(this));
+              */
 
 
-          });
+            });
+          }
 
-       
+          
+
+        });
+        return model;
       }
-      else {
-        Backbone.Model.prototype.set.call(this,...arguments);
-      }
+    }
+    else{
+      return Backbone.Model.prototype.set.apply(this,arguments);
+    }
+
+
       
      
   }
