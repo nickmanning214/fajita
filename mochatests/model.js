@@ -1,4 +1,4 @@
-describe('App = Fajita.Model', function() {
+describe('App = Fajita.Model.extend', function() {
 
     var App = Fajita.Model.extend({});
     
