@@ -19,20 +19,17 @@ export default Backbone.View.extend({
     constructor:function(options) {
          //debugger;
 
-
+         //Make options hash "strict". Only allow certain options to be passed in.
         _.each(_.difference(_.keys(options),_.union(backboneViewOptions,additionalViewOptions)),function(prop){
             console.warn("Warning! Unknown property "+prop);
         })
 
-
+        
         if (!this.jst && !this.templateString) throw new Error("You need a template");
         if (!this.jst){
-            this.cid = _.uniqueId(this.tplid);
             this.jst = _.template(this.templateString)
         }
-        else{
-            this.cid = _.uniqueId('view');
-        }
+       
         _.extend(this, _.pick(options, backboneViewOptions.concat(additionalViewOptions)));
 
         //Add this here so that it's available in className function
