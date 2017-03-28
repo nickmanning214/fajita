@@ -16,20 +16,23 @@ export default Backbone.View.extend({
         return a;
         
     },
-    constructor:function(options) {
-         //debugger;
+     constructor: function constructor(options) {
+        //debugger;
 
-         //Make options hash "strict". Only allow certain options to be passed in.
-        _.each(_.difference(_.keys(options),_.union(backboneViewOptions,additionalViewOptions)),function(prop){
-            console.warn("Warning! Unknown property "+prop);
-        })
+        //Make options hash "strict". Only allow certain options to be passed in.
+        _.each(_.difference(_.keys(options), _.union(backboneViewOptions, additionalViewOptions)), function (prop) {
+            console.warn("Warning! Unknown property " + prop);
+        });
 
-        
+        //Require a fajita view to have a template.
+        //Send a templateString (string) or jst (function)
+        //Is it necessary to differentiate? Could just check if it's a string.
+        //On the other hand, it's nice to know if you're sending a string template or a javascript template.
         if (!this.jst && !this.templateString) throw new Error("You need a template");
-        if (!this.jst){
-            this.jst = _.template(this.templateString)
+        if (!this.jst) {
+            this.jst = _.template(this.templateString);
         }
-       
+
         _.extend(this, _.pick(options, backboneViewOptions.concat(additionalViewOptions)));
 
         //Add this here so that it's available in className function
@@ -37,9 +40,9 @@ export default Backbone.View.extend({
             console.error("You need defaults for your view");
         }
 
-        _.each(this.defaults,function(def){
-            if (_.isFunction(def)) console.warn("Defaults should usually be primitive values")
-        })
+        _.each(this.defaults, function (def) {
+            if (_.isFunction(def)) console.warn("Defaults should usually be primitive values");
+        });
 
         //data is passed in on subviews
         // comes from this.view.viewModel.get(this.val);, 
@@ -48,10 +51,9 @@ export default Backbone.View.extend({
         //But it is not meant to override mappings I don't think.
         this.overrideSubviewDefaultsHash = options && options.overrideSubviewDefaultsHash;
 
-        var attrs = _.extend(_.clone(this.defaults),(options && options.overrideSubviewDefaultsHash) || {})
-        console.log(this.overrideSubviewDefaultsHash,attrs)
+        var attrs = _.extend(_.clone(this.defaults), options && options.overrideSubviewDefaultsHash || {});
+        console.log(this.overrideSubviewDefaultsHash, attrs);
         this.viewModel = new Backbone.Model(attrs);
-
 
         //mappings contain mappings of view variables to model variables.
         //strings are references to model variables. Functions are for when a view variable does
@@ -59,47 +61,42 @@ export default Backbone.View.extend({
         this.propMap = {};
         this.funcs = {};
 
-        _.each(this.mappings,function(modelVar,templateVar){
+        _.each(this.mappings, function (modelVar, templateVar) {
             if (typeof modelVar == "string") this.propMap[templateVar] = modelVar;
             else if (typeof modelVar == "function") this.funcs[templateVar] = modelVar;
-        }.bind(this));     
+        }.bind(this));
 
         //Problem: if you update the model it updates for every subview (not efficient).
         //And it does not update for submodels. Perhaps there are many different solutions for this.
         //You can have each submodel trigger change event.
-        
+
         //Whenever the model changes, update the viewModel by mapping properties of the model to properties of the view (assigned in mappings)
         //Also, the attributes change. This can be done more elegantly
-        if (this.model){
-            this.listenTo(this.model,"change",this.updateContextObject);
-            this.listenTo(this.model,"change",function(){
-			    this._setAttributes(_.extend({}, _.result(this, 'attributes')));
-		    });
-        
-            this.updateContextObject(this.model);
+        if (this.model) {
+            this.listenTo(this.model, "change", this.updateViewModel);
+            this.listenTo(this.model, "change", function () {
+                this._setAttributes(_.extend({}, _.result(this, 'attributes')));
+            });
+
+            this.updateViewModel();
         }
 
         var attrs = this.viewModel.attributes;
         var keys = Object.keys(this.viewModel.attributes);
-        keys.forEach(function(key){
-            if (key==="definitions" && !this.viewModel.attributes[key]){
+        keys.forEach(function (key) {
+            if (key === "definitions" && !this.viewModel.attributes[key]) {
                 //problem is that propMap (seems to be mappings with functions filtered out) is 
                 //{definitions:"definitions"}. Comes from article_article.js
                 debugger;
             }
         }.bind(this));
-        
-
 
         this._ensureElement();
         this.buildInnerHTML();
-        
 
-
-        this.initDirectives();//init simple directives...the ones that just manipulate an element
+        this.initDirectives(); //init simple directives...the ones that just manipulate an element
         this.delegateEvents();
-        
-        
+
         this.childNodes = [].slice.call(this.el.childNodes, 0);
 
         this.initialize.apply(this, arguments);
@@ -115,7 +112,7 @@ export default Backbone.View.extend({
         if (typeof this.mappings[attr] =="string") return this.model.get(this.mappings[attr]);
         else return this.mappings[attr].call(this)
     },
-    updateContextObject:function(model){
+    updateViewModel:function(){
 
         
         var obj = {}

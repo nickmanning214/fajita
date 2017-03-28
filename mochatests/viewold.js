@@ -3,7 +3,7 @@ describe("Fajita.View", function() {
         templateString: "Just a string",
         defaults: {}
     });
-
+ 
   
     it('should be able to be a view without a wrapper element', function() {
         var view = new BaseView();
