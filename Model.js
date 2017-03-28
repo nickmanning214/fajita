@@ -21,6 +21,8 @@ export default Backbone.Model.extend({
   
   get:function(attr){
 
+    //Todo: error check when attr has "->" but doesn't start with ->
+
     if (_.isString(attr)){
       var props = attr.split("->");
       if (props.length > 1){
@@ -31,10 +33,8 @@ export default Backbone.Model.extend({
         return model;
       }
     }
-    else{
-      var get = Backbone.Model.prototype.get.apply(this,arguments);
-      if (!_.isUndefined(get)) return get;
-    }
+    var get = Backbone.Model.prototype.get.apply(this,arguments);
+    if (!_.isUndefined(get)) return get;
     
 
  
