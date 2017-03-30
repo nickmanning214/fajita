@@ -28,18 +28,36 @@ describe("Fajita.View",function(){
 
     });
 
-    describe("model + mappings",function(){
-        it("should assign a model value to the view and be retrievable with view.get",function(){
-            var view = new View({
-                model:new Fajita.Model({
-                    name:"Nick Manning"
-                }),
-                mappings:{
-                    header:"name"
-                }
+    describe("model + templateValues",function(){
+         describe("the value is a function (`this` is the view)",function(){
+            it("should assign a model value to the view and be retrievable with view.get",function(){
+                var view = new View({
+                    model:new Fajita.Model({
+                        name:"Nick Manning"
+                    }),
+                    templateValues:{
+                        header:function(){
+                            return this.model.get("name");
+                        }
+                    }
+                });
+                expect(view.get("header")).to.equal("Nick Manning")
             });
-            expect(view.get("header")).to.equal("Nick Manning")
-        })
+        });
+        describe("the value is a string",function(){
+            it("should assign a model value to the view and be retrievable with view.get",function(){
+                var view = new View({
+                    model:new Fajita.Model({
+                        name:"Nick Manning"
+                    }),
+                    templateValues:{
+                        header:"name"
+                    }
+                });
+                expect(view.get("header")).to.equal("Nick Manning")
+            })
+        });
+        
     })
     
 })

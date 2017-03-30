@@ -54,7 +54,7 @@ define(function (require) {
 
         var view = new BaseView({
             model:app,
-            mappings:{
+            templateValues:{
                 items:"->people",
                 Item:{
                     content:"name"

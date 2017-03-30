@@ -37,7 +37,7 @@
                 
             
                 },
-                "test-mappings":function(){
+                "test-templateValues":function(){
                     
 
                     var View = Fajita.View.extend({
@@ -54,7 +54,7 @@
 
                     var view = new View({
                         model:app,
-                        mappings:{
+                        templateValues:{
                             content:"prop"
                         }
                     });
@@ -91,7 +91,7 @@
 
                     var view = new View({
                         model:app,
-                        mappings:{
+                        templateValues:{
                             content:"prop"
                         }
                     });
@@ -128,7 +128,7 @@
 
                     var view = new View({
                         model:app,
-                        mappings:{
+                        templateValues:{
                             content:function(){
                                 return app.get("->subModel").get("subProp")
                             }
@@ -152,7 +152,7 @@
                     window.app = app;
             var view = new BaseView({
                 model:app,
-                mappings:{
+                templateValues:{
                     href:"linkywink"
                 }
             });
@@ -188,7 +188,7 @@
                     });
 
                     var view = new BaseView({
-                        mappings:{
+                        templateValues:{
                             Item:{
                                 content:"name"
                             }
@@ -231,7 +231,7 @@
 
                     var view = new BaseView({
                         model:app,
-                        mappings:{
+                        templateValues:{
                             items:"->people",
                             Item:{
                                 content:"name"

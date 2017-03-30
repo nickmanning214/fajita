@@ -7,7 +7,7 @@ import Directive from "./directive/directive.js"
 
 
 var backboneViewOptions = ['model', 'collection', 'el', 'id', 'attributes', 'className', 'tagName', 'events'];
-var additionalViewOptions = ['mappings','templateString','childViewImports','subViewImports','index','lastIndex','defaultsOverride']
+var additionalViewOptions = ['templateValues','templateString','childViewImports','subViewImports','index','lastIndex','defaultsOverride']
 export default Backbone.View.extend({
     textNodesUnder:function(){
         //http://stackoverflow.com/questions/10730309/find-all-text-nodes-in-html-page
@@ -41,20 +41,20 @@ export default Backbone.View.extend({
         // comes from this.view.viewModel.get(this.val);, 
         //so if the directive is nm-subview="Menu", then this.data should be...what?
         //Aha! data is to override default values for subviews being part of a parent view. 
-        //But it is not meant to override mappings I don't think.
+        //But it is not meant to override templateValues I don't think.
         this.defaultsOverride = options && options.defaultsOverride;
 
         var attrs = _.extend(_.clone(this.defaults), options && options.defaultsOverride || {});
         console.log(this.defaultsOverride, attrs);
         this.viewModel = new Backbone.Model(attrs);
 
-        //mappings contain mappings of view variables to model variables.
+        //templateValues contain templateValues of view variables to model variables.
         //strings are references to model variables. Functions are for when a view variable does
         //not match perfectly with a model variable. These are updated each time the model changes.
         this.propMap = {};
         this.funcs = {};
 
-        _.each(this.mappings, function (modelVar, templateVar) {
+        _.each(this.templateValues, function (modelVar, templateVar) {
             if (typeof modelVar == "string") this.propMap[templateVar] = modelVar;
             else if (typeof modelVar == "function") this.funcs[templateVar] = modelVar;
         }.bind(this));
@@ -63,7 +63,7 @@ export default Backbone.View.extend({
         //And it does not update for submodels. Perhaps there are many different solutions for this.
         //You can have each submodel trigger change event.
 
-        //Whenever the model changes, update the viewModel by mapping properties of the model to properties of the view (assigned in mappings)
+        //Whenever the model changes, update the viewModel by mapping properties of the model to properties of the view (assigned in templateValues)
         //Also, the attributes change. This can be done more elegantly
         if (this.model) {
             this.listenTo(this.model, "change", this.updateViewModel);
@@ -78,7 +78,7 @@ export default Backbone.View.extend({
         var keys = Object.keys(this.viewModel.attributes);
         keys.forEach(function (key) {
             if (key === "definitions" && !this.viewModel.attributes[key]) {
-                //problem is that propMap (seems to be mappings with functions filtered out) is 
+                //problem is that propMap (seems to be templateValues with functions filtered out) is 
                 //{definitions:"definitions"}. Comes from article_article.js
                 debugger;
             }
@@ -102,8 +102,8 @@ export default Backbone.View.extend({
     },
     getModelAttr:function(attr){
         //quickly grab a models attribute by a view variable. Useful in classname function.
-        if (typeof this.mappings[attr] =="string") return this.model.get(this.mappings[attr]);
-        else return this.mappings[attr].call(this)
+        if (typeof this.templateValues[attr] =="string") return this.model.get(this.templateValues[attr]);
+        else return this.templateValues[attr].call(this)
     },
     updateViewModel:function(){
 
@@ -145,11 +145,11 @@ export default Backbone.View.extend({
     initDirectives:function(){
 
         
-         //Init directives involving {{}}
+        //Init directives involving {{}}
 
-        this._initialTextNodes = this.textNodesUnder();
+        //Get all of the text nodes in the document.
         this._subViewElements = [];
-        this._initialTextNodes.forEach(function(fullTextNode){
+        this.textNodesUnder().forEach(function(fullTextNode){
             //http://stackoverflow.com/a/21311670/1763217 textContent seems right
 
             var re = /\{\{(.+?)\}\}/g;

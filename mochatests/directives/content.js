@@ -30,12 +30,12 @@ describe('nm-content', function() {
         })
     });
 
-    describe("pass app/mappings as option to view",function(){
+    describe("pass app/templateValues as option to view",function(){
 
         app = new Fajita.Model({name: "Nick"});
         content3 = new Content({
             model: app,
-            mappings: {
+            templateValues: {
                 content: "name"
             }
         });
@@ -49,7 +49,7 @@ describe('nm-content', function() {
         app2 = new Fajita.Model({name: "Nick"});
         content4 = new Content({
             model: app2,
-            mappings: {
+            templateValues: {
                 content: "name"
             }
         });
@@ -65,7 +65,7 @@ describe('nm-content', function() {
         app3 = new Fajita.Model({name: "Nick"});
         content5 = new Content({
             model: app3,
-            mappings: {
+            templateValues: {
                 content: function(){
                     return this.model.get("name")+"!"
                 }
@@ -101,7 +101,7 @@ describe('nm-content', function() {
 
             var view = new DeepView({
                 model: app,
-                mappings: {
+                templateValues: {
                     content: function() {
                         return app.get("->subModel").get("subProp")
                     }

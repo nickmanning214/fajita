@@ -193,7 +193,7 @@ describe("all-directives",function(){
         initialApp = new Fajita.Model(initialAppProps);
         appPassedView = new HugeView({
             model:initialApp,
-            mappings:{
+            templateValues:{
                 content:"app_content",
                 enable:"app_enable",
                 dontenable:"app_dontenable",
@@ -237,7 +237,7 @@ describe("all-directives",function(){
         newApp = new Fajita.Model(initialAppProps);
         newAppView = new HugeView({
             model:newApp,
-            mappings:{
+            templateValues:{
                 content:"app_content",
                 enable:"app_enable",
                 dontenable:"app_dontenable",
@@ -265,7 +265,7 @@ describe("all-directives",function(){
     it('should work with app.set (function)',function(){
        viewFunctions = new HugeView({
             model:initialApp,
-            mappings:{
+            templateValues:{
                 content:function(){
                     return this.model.get("app_content")
                 },
@@ -308,7 +308,7 @@ describe("all-directives",function(){
        var directiveArrays = _.omit(viewFunctions.directive,["subview","map"]);
         _.each(directiveArrays,function(directiveArray){
             _.each(directiveArray,function(directiveInstance){
-                expect(directiveInstance.test(viewFunctions.mappings[directiveInstance.val].call(viewFunctions))).to.be.true
+                expect(directiveInstance.test(viewFunctions.templateValues[directiveInstance.val].call(viewFunctions))).to.be.true
             })
         });
     })

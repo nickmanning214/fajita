@@ -15,7 +15,7 @@ export default AbstractSubview.extend({
 
         if (this.childMappings){
             _.extend(options,{
-                mappings:this.childMappings
+                templateValues:this.childMappings
                 //,el:this.el The el of the directive should belong to the directive but not the subview itself
             })
         }
@@ -77,10 +77,10 @@ export default AbstractSubview.extend({
 
 
 
-                //Map models to childView instances with their mappings
+                //Map models to childView instances with their templateValues
                 this.ChildView = this.view.childViewImports[this.subViewName];
                 this.childViewOptions = {
-                    mappings:this.childMappings,
+                    templateValues:this.childMappings,
                     collection:this.subCollection,
                     tagName:this.view.childViewImports[this.subViewName].prototype.tagName || "subitem",
                     defaultsOverride:this.defaultsOverride
@@ -125,7 +125,7 @@ export default AbstractSubview.extend({
 
         if (this.childMappings){
             _.extend(options,{
-                mappings:this.childMappings
+                templateValues:this.childMappings
                 //,el:this.el The el of the directive should belong to the directive but not the subview itself
             })
         }
@@ -193,7 +193,7 @@ export default AbstractSubview.extend({
             else {
                 var newChildView = new this.ChildView({
                     model:model,
-                    mappings:this.childMappings,
+                    templateValues:this.childMappings,
                     index:i,
                     lastIndex:this.subCollection.length - i - 1,
                     collection:this.subCollection,

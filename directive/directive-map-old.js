@@ -6,7 +6,7 @@ export default Directive.extend({
     childInit:function(){
         this.collection = this.view.viewModel.get(this.val.split(":")[0]);
         this.ChildView = this.view.childViewImports[this.val.split(":")[1]];
-        if (this.view.mappings && this.view.mappings[this.val.split(":")[1]]) this.childViewMappings = this.view.mappings[this.val.split(":")[1]];
+        if (this.view.templateValues && this.view.templateValues[this.val.split(":")[1]]) this.childViewMappings = this.view.templateValues[this.val.split(":")[1]];
         
        
 
@@ -30,11 +30,11 @@ export default Directive.extend({
         
     },
     build:function(){
-        //Map models to childView instances with their mappings
+        //Map models to childView instances with their templateValues
         this.childViews = this.collection.map(function(childModel,i){
             var childview = new this.ChildView({
                 model:childModel,
-                mappings:this.childViewMappings,
+                templateValues:this.childViewMappings,
                 index:i,
                 lastIndex:this.collection.length - i - 1,
                 collection:this.collection,
@@ -77,7 +77,7 @@ export default Directive.extend({
             else {
                 var newChildView = new this.ChildView({
                     model:model,
-                    mappings:this.childViewMappings,
+                    templateValues:this.childViewMappings,
                     index:i,
                     lastIndex:this.collection.length - i - 1,
                     collection:this.collection,

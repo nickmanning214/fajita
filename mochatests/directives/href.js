@@ -3,7 +3,7 @@ describe('nm-href', function() {
 
     it('default',function(){})
     it('view.set',function(){})
-    it('pass app/mappings as option to view',function(){})
+    it('pass app/templateValues as option to view',function(){})
     it('app.set',function(){})
     it('app.set (with function)',function(){})
 
@@ -64,7 +64,7 @@ describe('nm-href', function() {
 
         var view = new H1Link({
             model: app,
-            mappings: {
+            templateValues: {
                 href: "linkywink"
             }
         });

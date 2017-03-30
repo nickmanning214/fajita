@@ -38,7 +38,7 @@ define(function (require) {
 
             var view = new BaseView({
                 model:app,
-                mappings:{
+                templateValues:{
                     href:"linkywink"
                 }
             });

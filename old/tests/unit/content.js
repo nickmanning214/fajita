@@ -48,7 +48,7 @@ define(function (require) {
 
             var view = new BaseView({
                 model:app,
-                mappings:{
+                templateValues:{
                     content:"prop"
                 }
             });
@@ -77,7 +77,7 @@ define(function (require) {
 
             var view = new View({
                 model:app,
-                mappings:{
+                templateValues:{
                     content:"prop"
                 }
             });
@@ -111,7 +111,7 @@ define(function (require) {
 
             var view = new View({
                 model:app,
-                mappings:{
+                templateValues:{
                     content:function(){
                         return app.get("->subModel").get("subProp")
                     }

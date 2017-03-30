@@ -1,9 +1,9 @@
 Error checkings for the developer:
 
 Common mistake is to misname "childViewImports" as "subViewImports". Check for this.
-Error checker for if you forget to nest mappings: Eg you put mappings:{h1Content:pageTitle} instead of mappings {Header:{h1Content:pageTitle}}. Check the reverse too. Sometimes you accidentally put items inside of Item for example.
+Error checker for if you forget to nest templateValues: Eg you put templateValues:{h1Content:pageTitle} instead of templateValues {Header:{h1Content:pageTitle}}. Check the reverse too. Sometimes you accidentally put items inside of Item for example.
 Error checker if you accidentally put the global name for a subview instead of the local subview name {FrameHeader:{h1Content:pageTitle}} instead of {Header:{h1Content:pageTitle}}
-Check if you forgot "->" in mappings
+Check if you forgot "->" in templateValues
 Misspellings childViewImports or ChildViewImports
 
 
@@ -32,7 +32,7 @@ NOTES:
  - It's not necessary to test changing app.set inside of a backbone.view events hash. Just test calling app.set
  DONE:
 
- !!!IMPORTANT!!! You need to be able to have mappings on a class declaration, not just passed as an option on init. That's because sometimes there are default models/collections that have dummy app values as properties and they need to be mapped to template values.
+ !!!IMPORTANT!!! You need to be able to have templateValues on a class declaration, not just passed as an option on init. That's because sometimes there are default models/collections that have dummy app values as properties and they need to be mapped to template values.
 👆🏻Turns out this was already done. 
 
 

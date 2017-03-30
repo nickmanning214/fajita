@@ -52,12 +52,12 @@ describe('nm-enable', function() {
         })
     });
 
-    describe("pass app/mappings as option to view",function(){
+    describe("pass app/templateValues as option to view",function(){
 
         onoff1 = new Fajita.Model({switchOn: false});
         buttonEnabled3 = new ButtonEnabled({
             model: onoff1,
-            mappings: {
+            templateValues: {
                 buttonEnable: "switchOn"
             }
         });
@@ -65,7 +65,7 @@ describe('nm-enable', function() {
         onoff2 = new Fajita.Model({switchOn: false});
         buttonDisabled3 = new ButtonDisabled({
             model: onoff2,
-            mappings: {
+            templateValues: {
                 buttonEnable: "switchOn"
             }
         });
@@ -84,7 +84,7 @@ describe('nm-enable', function() {
             onoff3 = new Fajita.Model({switchOn: false});
             buttonEnabled4 = new ButtonEnabled({
                 model: onoff3,
-                mappings: {
+                templateValues: {
                     buttonEnable: "switchOn"
                 }
             });
@@ -104,7 +104,7 @@ describe('nm-enable', function() {
             onoff4 = new Fajita.Model({switchOn: false});
             buttonEnabled5 = new ButtonEnabled({
                 model: onoff4,
-                mappings: {
+                templateValues: {
                     buttonEnable: function(){
                         return !this.model.get("switchOn");
                     }

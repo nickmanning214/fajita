@@ -163,7 +163,7 @@ describe('nm-src', function() {
 
         var view = new BaseView({
             model: app,
-            mappings: {
+            templateValues: {
                 src: "sourceysource"
             }
         });
@@ -321,14 +321,14 @@ describe('nm-subview', function() {
 
         var view = new HeaderViewContent({
             model: site,
-            mappings: {
+            templateValues: {
                 Menu: {
                     content: "menuContent"
                 }
             }
         });
 
-        //Note: Comment out "mappings" and behavior changes. Might be onto something there.
+        //Note: Comment out "templateValues" and behavior changes. Might be onto something there.
 
         window.view = view;
 
@@ -345,7 +345,7 @@ describe('nm-subview', function() {
 
         var view = new HeaderViewSubModel({
             model: site,
-            mappings: {
+            templateValues: {
                 menu:"->menu",
                 Menu: { //imagine syntax like "Menu:submodel":{}
                     content: "links"
@@ -377,7 +377,7 @@ describe('nm-subview', function() {
 
         var view = new HeaderViewSubCollection({
             model: site,
-            mappings: {
+            templateValues: {
                 menu:"->menu",
                 Menu: {
                     content: "name"
@@ -417,7 +417,7 @@ describe('nm-map', function() {
                 }
             ])
         },
-        mappings: {
+        templateValues: {
             Item: {
                 content: "name"
             }
@@ -448,7 +448,7 @@ describe('nm-map', function() {
 
     var view = new BaseView({
         model: app,
-        mappings: {
+        templateValues: {
             items: "->people",
             Item: {
                 content: "name"

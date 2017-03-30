@@ -4,17 +4,17 @@ You don't actually need defaults if you don't have any variables in your templat
 
 Also requiring a template is iffy because when you're building the structure of the app and you don't want anything there yet, it will complain.
 
-Error checker for if you forget to nest mappings: Eg you put mappings:{h1Content:pageTitle} instead of mappings {Header:{h1Content:pageTitle}}
+Error checker for if you forget to nest templateValues: Eg you put templateValues:{h1Content:pageTitle} instead of templateValues {Header:{h1Content:pageTitle}}
 
 Error checker if you accidentally put the global name for a subview instead of the local subview name {FrameHeader:{h1Content:pageTitle}} instead of {Header:{h1Content:pageTitle}}
 
 Include the whole docfrag stuff in your testing.
 
-!!!IMPORTANT!!! You need to be able to have mappings on a class declaration, not just passed as an option on init. That's because sometimes there are default models/collections that have dummy app values as properties and they need to be mapped to template values.
+!!!IMPORTANT!!! You need to be able to have templateValues on a class declaration, not just passed as an option on init. That's because sometimes there are default models/collections that have dummy app values as properties and they need to be mapped to template values.
 
 Allow passing models/collections into constructor for models.
 
-Check if you forgot "->" in mappings
+Check if you forgot "->" in templateValues
 
 Remove tagName from mapped childview and then add to the collection, you see an error dummydiv is not defined
 

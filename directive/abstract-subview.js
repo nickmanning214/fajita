@@ -16,9 +16,9 @@ export default Directive.extend({
          }
     },
     _initializeChildMappings:function(){
-        //The JSON object to pass as "mappings" to the subview or the item in the subCollection.
+        //The JSON object to pass as "templateValues" to the subview or the item in the subCollection.
          //Do not shorten to view.get. view.get gets from the viewModel which contains props and values...not view props and app props
-        this.childMappings = this.view.mappings && this.view.mappings[this.subViewName];
+        this.childMappings = this.view.templateValues && this.view.templateValues[this.subViewName];
     },
     _initializedefaultsOverride:function(){
         //Not shortened to view.get because I'm not sure if it is useful to do so.
