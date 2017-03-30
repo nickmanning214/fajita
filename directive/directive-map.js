@@ -31,7 +31,7 @@ export default AbstractSubview.extend({
             mappings:this.childMappings,
             collection:this.subCollection,
             tagName:this.view.childViewImports[this.subViewName].prototype.tagName || "subitem",
-            overrideSubviewDefaultsHash:this.overrideSubviewDefaultsHash
+            defaultsOverride:this.defaultsOverride
         };
 
 
@@ -41,8 +41,8 @@ export default AbstractSubview.extend({
                 model:childModel,
                 index:i,
                 lastIndex:this.subCollection.length - i - 1,
-                overrideSubviewDefaultsHash:this.overrideSubviewDefaultsHash && this.overrideSubviewDefaultsHash.models[i] && this.overrideSubviewDefaultsHash.models[i].attributes,
-                //Just added check for this.overrideSubviewDefaultsHash.models[i]
+                defaultsOverride:this.defaultsOverride && this.defaultsOverride.models[i] && this.defaultsOverride.models[i].attributes,
+                //Just added check for this.defaultsOverride.models[i]
             });
             
             var childview = new this.ChildView(childViewOptions);
@@ -54,7 +54,7 @@ export default AbstractSubview.extend({
     childInit:function(){
         this._initializeBackboneObject();
         this._initializeChildMappings();
-        this._initializeOverrideSubviewDefaultsHash();
+        this._initializedefaultsOverride();
         this._initializeChildViews();
 
         

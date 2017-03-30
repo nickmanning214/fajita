@@ -7,7 +7,7 @@ import Directive from "./directive/directive.js"
 
 
 var backboneViewOptions = ['model', 'collection', 'el', 'id', 'attributes', 'className', 'tagName', 'events'];
-var additionalViewOptions = ['mappings','templateString','childViewImports','subViewImports','index','lastIndex','overrideSubviewDefaultsHash']
+var additionalViewOptions = ['mappings','templateString','childViewImports','subViewImports','index','lastIndex','defaultsOverride']
 export default Backbone.View.extend({
     textNodesUnder:function(){
         //http://stackoverflow.com/questions/10730309/find-all-text-nodes-in-html-page
@@ -17,28 +17,35 @@ export default Backbone.View.extend({
         
     },
      constructor: function constructor(options) {
-        //debugger;
+        //Add this here so that it's available in className function
+        var errors = [];
+        if (!this.defaults) {
+            errors.push("You need defaults for your view");
+            /* Not convinced I should do this
+            _.each(_.difference(_.keys(options), _.union(backboneViewOptions, additionalViewOptions)), function (prop) {
+                errors.push(prop+" is an invalid property");
+            });*/
+            if (!this.jst && !this.templateString) errors.push("You need a template");
+        }
+        if (errors.length){
+            throw errors;
+        }
 
-        //Make options hash "strict". Only allow certain options to be passed in.
-        _.each(_.difference(_.keys(options), _.union(backboneViewOptions, additionalViewOptions)), function (prop) {
-            console.warn("Warning! Unknown property " + prop);
-        });
+
+
+
 
         //Require a fajita view to have a template.
         //Send a templateString (string) or jst (function)
         //Is it necessary to differentiate? Could just check if it's a string.
         //On the other hand, it's nice to know if you're sending a string template or a javascript template.
-        if (!this.jst && !this.templateString) throw new Error("You need a template");
         if (!this.jst) {
             this.jst = _.template(this.templateString);
         }
 
         _.extend(this, _.pick(options, backboneViewOptions.concat(additionalViewOptions)));
 
-        //Add this here so that it's available in className function
-        if (!this.defaults) {
-            console.error("You need defaults for your view");
-        }
+        
 
         _.each(this.defaults, function (def) {
             if (_.isFunction(def)) console.warn("Defaults should usually be primitive values");
@@ -49,10 +56,10 @@ export default Backbone.View.extend({
         //so if the directive is nm-subview="Menu", then this.data should be...what?
         //Aha! data is to override default values for subviews being part of a parent view. 
         //But it is not meant to override mappings I don't think.
-        this.overrideSubviewDefaultsHash = options && options.overrideSubviewDefaultsHash;
+        this.defaultsOverride = options && options.defaultsOverride;
 
-        var attrs = _.extend(_.clone(this.defaults), options && options.overrideSubviewDefaultsHash || {});
-        console.log(this.overrideSubviewDefaultsHash, attrs);
+        var attrs = _.extend(_.clone(this.defaults), options && options.defaultsOverride || {});
+        console.log(this.defaultsOverride, attrs);
         this.viewModel = new Backbone.Model(attrs);
 
         //mappings contain mappings of view variables to model variables.
@@ -311,22 +318,22 @@ export default Backbone.View.extend({
     tagName:undefined,//don't want a tagName to be div by default. Rather, make it a documentfragment'
     subViewImports:{},
     childViewImports:{},
-      _ensureElement: function() {
-                //Overriding this to support document fragments
-            if (!this.el) {
-                if(this.attributes || this.id || this.className || this.tagName){//if you have any of these backbone properties, do backbone behavior
-                        var attrs = _.extend({}, _.result(this, 'attributes'));
-                        if (this.id) attrs.id = _.result(this, 'id');
-                        if (this.className) attrs['class'] = _.result(this, 'className');
-                        this.setElement(this._createElement(_.result(this, 'tagName') || 'div'));
-                        this._setAttributes(attrs);
-                }
-                else{//however, default to this.el being a documentfragment (makes this.el named improperly but whatever)
-                    this.el = document.createDocumentFragment();
-                }
-            } else {
-                this.setElement(_.result(this, 'el'));
+    _ensureElement: function() {
+            //Overriding this to support document fragments
+        if (!this.el) {
+            if(this.attributes || this.id || this.className || this.tagName){//if you have any of these backbone properties, do backbone behavior
+                    var attrs = _.extend({}, _.result(this, 'attributes'));
+                    if (this.id) attrs.id = _.result(this, 'id');
+                    if (this.className) attrs['class'] = _.result(this, 'className');
+                    this.setElement(this._createElement(_.result(this, 'tagName') || 'div'));
+                    this._setAttributes(attrs);
             }
+            else{//however, default to this.el being a documentfragment (makes this.el named improperly but whatever)
+                this.el = document.createDocumentFragment();
+            }
+        } else {
+            this.setElement(_.result(this, 'el'));
+        }
     },
     set:function(obj){
         this.viewModel.set(obj);

@@ -123,12 +123,12 @@ describe('map inside of map',function(){
 
         //overrides
 
-        expect(pageHasParagraphsHasWordsView.directive.map[0].childViews[0].overrideSubviewDefaultsHash.Word.at(0).get("value")).to.equal("Hello")
-        expect(pageHasParagraphsHasWordsView.directive.map[0].childViews[0].overrideSubviewDefaultsHash.Word.at(1).get("value")).to.equal("Hello")
-        expect(pageHasParagraphsHasWordsView.directive.map[0].childViews[0].overrideSubviewDefaultsHash.Word.at(2).get("value")).to.equal("Hello")
-        expect(pageHasParagraphsHasWordsView.directive.map[0].childViews[1].overrideSubviewDefaultsHash.Word.at(0).get("value")).to.equal("Hi")
-        expect(pageHasParagraphsHasWordsView.directive.map[0].childViews[1].overrideSubviewDefaultsHash.Word.at(1).get("value")).to.equal("What's")
-        expect(pageHasParagraphsHasWordsView.directive.map[0].childViews[1].overrideSubviewDefaultsHash.Word.at(2).get("value")).to.equal("Up")
+        expect(pageHasParagraphsHasWordsView.directive.map[0].childViews[0].defaultsOverride.Word.at(0).get("value")).to.equal("Hello")
+        expect(pageHasParagraphsHasWordsView.directive.map[0].childViews[0].defaultsOverride.Word.at(1).get("value")).to.equal("Hello")
+        expect(pageHasParagraphsHasWordsView.directive.map[0].childViews[0].defaultsOverride.Word.at(2).get("value")).to.equal("Hello")
+        expect(pageHasParagraphsHasWordsView.directive.map[0].childViews[1].defaultsOverride.Word.at(0).get("value")).to.equal("Hi")
+        expect(pageHasParagraphsHasWordsView.directive.map[0].childViews[1].defaultsOverride.Word.at(1).get("value")).to.equal("What's")
+        expect(pageHasParagraphsHasWordsView.directive.map[0].childViews[1].defaultsOverride.Word.at(2).get("value")).to.equal("Up")
         
         //models
         expect(pageHasParagraphsHasWordsView.directive.map[0].childViews[0].directive.map[0].childViews[0].get("value")).to.equal("Hello");

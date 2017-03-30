@@ -9,8 +9,8 @@ export default AbstractSubview.extend({
 
          var options = {};
            
-        if (this.overrideSubviewDefaultsHash){
-            _.extend(options,{overrideSubviewDefaultsHash:this.overrideSubviewDefaultsHash});
+        if (this.defaultsOverride){
+            _.extend(options,{defaultsOverride:this.defaultsOverride});
         }
 
         if (this.childMappings){
@@ -51,7 +51,7 @@ export default AbstractSubview.extend({
 
         this._initializeBackboneObject();
         this._initializeChildMappings();
-        this._initializeOverrideSubviewDefaultsHash();
+        this._initializedefaultsOverride();
         this._initializeChildViews();
         
         
@@ -83,7 +83,7 @@ export default AbstractSubview.extend({
                     mappings:this.childMappings,
                     collection:this.subCollection,
                     tagName:this.view.childViewImports[this.subViewName].prototype.tagName || "subitem",
-                    overrideSubviewDefaultsHash:this.overrideSubviewDefaultsHash
+                    defaultsOverride:this.defaultsOverride
                 };
                 this.childViews = this.subCollection.map(function(childModel,i){
                     
@@ -91,8 +91,8 @@ export default AbstractSubview.extend({
                         model:childModel,
                         index:i,
                         lastIndex:this.subCollection.length - i - 1,
-                        overrideSubviewDefaultsHash:this.overrideSubviewDefaultsHash && this.overrideSubviewDefaultsHash.models[i] && this.overrideSubviewDefaultsHash.models[i].attributes,
-                        //Just added check for this.overrideSubviewDefaultsHash.models[i]
+                        defaultsOverride:this.defaultsOverride && this.defaultsOverride.models[i] && this.defaultsOverride.models[i].attributes,
+                        //Just added check for this.defaultsOverride.models[i]
                     });
                     
                     var childview = new this.ChildView(childViewOptions);
@@ -119,8 +119,8 @@ export default AbstractSubview.extend({
         
         var options = {};
            
-        if (this.overrideSubviewDefaultsHash){
-            _.extend(options,{overrideSubviewDefaultsHash:this.overrideSubviewDefaultsHash});
+        if (this.defaultsOverride){
+            _.extend(options,{defaultsOverride:this.defaultsOverride});
         }
 
         if (this.childMappings){

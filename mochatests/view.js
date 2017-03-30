@@ -1,8 +1,20 @@
 describe("Fajita.View.extend", function() {
-    var BaseView = Fajita.View.extend({
-        templateString: "Just a string",
-        defaults: {}
+    
+    var NoDefaults = Fajita.View.extend({});    
+    var noDefaultsF = function(){new NoDefaults()};
+
+    it("should require a defaults hash and a template",function(){
+        try{
+            noDefaultsF();
+        }
+        catch(errors){
+            expect(_.includes(errors,"You need defaults for your view")).to.be.true;
+            expect(_.includes(errors,"You need a template")).to.be.true;
+        }
     });
+
+
+
 
     /*
     This is problematic because you don't save a reference to the children when you append it (or maybe it was for some other reason)
