@@ -17,32 +17,18 @@ export default Backbone.View.extend({
         
     },
      constructor: function constructor(options) {
-        //Add this here so that it's available in className function
-        var errors = [];
-        if (!this.defaults) {
-            errors.push("You need defaults for your view");
-            /* Not convinced I should do this
-            _.each(_.difference(_.keys(options), _.union(backboneViewOptions, additionalViewOptions)), function (prop) {
-                errors.push(prop+" is an invalid property");
-            });*/
-            if (!this.jst && !this.templateString) errors.push("You need a template");
-        }
-        if (errors.length){
-            throw errors;
-        }
 
-
-
-
-
-        //Require a fajita view to have a template.
-        //Send a templateString (string) or jst (function)
-        //Is it necessary to differentiate? Could just check if it's a string.
-        //On the other hand, it's nice to know if you're sending a string template or a javascript template.
+       
+        //A template and defaults are all but required.
+        if (!this.jst && !this.templateString) console.warn("You probably need a template");
+        if (!this.defaults) console.warn("You probably need some defaults for your view");
+        
+        //Convert templateString to a javascript template
         if (!this.jst) {
-            this.jst = _.template(this.templateString);
+            this.jst = _.template(this.templateString || "");
         }
 
+        //extend only valid options
         _.extend(this, _.pick(options, backboneViewOptions.concat(additionalViewOptions)));
 
         

@@ -1,40 +1,45 @@
-describe("NoDefaults = Fajita.View.extend({})", function() {
-    
-    var NoDefaults = Fajita.View.extend({});    
-    var noDefaultsF = function(){new NoDefaults()};
+describe("Fajita.View",function(){
 
-    it("should require a defaults hash and a template",function(){
-        try{
-            noDefaultsF();
-        }
-        catch(errors){
-            expect(_.includes(errors,"You need defaults for your view")).to.be.true;
-            expect(_.includes(errors,"You need a template")).to.be.true;
-        }
-    });
-});
-
-describe(`HasDefaults = Fajita.View.extend({
-    defaults:{
-        text:"Hello"
-    }
-})`,function(){
-    var HasDefaults = Fajita.View.extend({
+    var View = Fajita.View.extend({
         defaults:{
-            text:"Hello"
+            header:"This is a header"
         }
     });
+
+    describe("defaults",function(){
+        
+       
+        
+        it("should assign a default value to the view and be retrievable with view.get",function(){
+            var view = new View;
+            expect(view.get("header")).to.equal("This is a header");
+        });
+
+        it("should be possible to override defaults with defaultsOverride option",function(){
+            var view = new View({
+                defaultsOverride:{
+                    header:"This is a header override"
+                }
+            });
+            expect(view.get("header")).to.equal("This is a header override");
+        });
+
+
+
+    });
+
+    describe("model + mappings",function(){
+        it("should assign a model value to the view and be retrievable with view.get",function(){
+            var view = new View({
+                model:new Fajita.Model({
+                    name:"Nick Manning"
+                }),
+                mappings:{
+                    header:"name"
+                }
+            });
+            expect(view.get("header")).to.equal("Nick Manning")
+        })
+    })
+    
 })
-
-
-
-    /*
-    This is problematic because you don't save a reference to the children when you append it (or maybe it was for some other reason)
-    IIRC, it doesn't play nicely with nm-map.
-    it('should be able to be a view without a wrapper element', function() {        
-        view = new BaseView();
-        var div = document.createElement("div");
-        $sandbox.append(div);
-        div.appendChild(view.el);
-        expect(div.childNodes[0].textContent).to.equal("Just a string")
-    });*/
