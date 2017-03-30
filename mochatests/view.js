@@ -1,4 +1,4 @@
-describe("Fajita.View.extend", function() {
+describe("NoDefaults = Fajita.View.extend({})", function() {
     
     var NoDefaults = Fajita.View.extend({});    
     var noDefaultsF = function(){new NoDefaults()};
@@ -12,7 +12,19 @@ describe("Fajita.View.extend", function() {
             expect(_.includes(errors,"You need a template")).to.be.true;
         }
     });
+});
 
+describe(`HasDefaults = Fajita.View.extend({
+    defaults:{
+        text:"Hello"
+    }
+})`,function(){
+    var HasDefaults = Fajita.View.extend({
+        defaults:{
+            text:"Hello"
+        }
+    });
+})
 
 
 
@@ -26,4 +38,3 @@ describe("Fajita.View.extend", function() {
         div.appendChild(view.el);
         expect(div.childNodes[0].textContent).to.equal("Just a string")
     });*/
-})
