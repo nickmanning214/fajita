@@ -7,9 +7,9 @@ import Directive from "./directive/directive.js"
 
 
 var backboneViewOptions = ['model', 'collection', 'el', 'id', 'attributes', 'className', 'tagName', 'events'];
-var additionalViewOptions = ['templateValues','templateString','childViewImports','subViewImports','index','lastIndex','defaultsOverride']
+var additionalViewOptions = ['warn','templateValues','templateString','childViewImports','subViewImports','index','lastIndex','defaultsOverride']
 export default Backbone.View.extend({
-    textNodesUnder:function(){
+    getAllTextNodes:function(){
         //http://stackoverflow.com/questions/10730309/find-all-text-nodes-in-html-page
         var n, a=[], walk=document.createTreeWalker(this.el,NodeFilter.SHOW_TEXT,null,false);
         while(n=walk.nextNode()) a.push(n);
@@ -18,10 +18,14 @@ export default Backbone.View.extend({
     },
      constructor: function constructor(options) {
 
-       
+        var options = options || {};
+
         //A template and defaults are all but required.
-        if (!this.jst && !this.templateString) console.warn("You probably need a template");
-        if (!this.defaults) console.warn("You probably need some defaults for your view");
+        if (this.warn || typeof this.warn=="undefined"){
+            if (!this.jst && !this.templateString) console.warn("You probably need a template");
+            if (!this.defaults) console.warn("You probably need some defaults for your view");
+        }
+        
         
         //Convert templateString to a javascript template
         if (!this.jst) {
@@ -44,9 +48,19 @@ export default Backbone.View.extend({
         //But it is not meant to override templateValues I don't think.
         this.defaultsOverride = options && options.defaultsOverride;
 
+        
+        
+
         var attrs = _.extend(_.clone(this.defaults), options && options.defaultsOverride || {});
-        console.log(this.defaultsOverride, attrs);
-        this.viewModel = new Backbone.Model(attrs);
+        this.viewModel = new Fajita.Model(attrs);
+
+        if (this.subViewImports){
+            for(var prop in this.subViewImports){
+                this.viewModel.set("->"+prop,attrs[prop])
+                console.log("->"+prop,attrs[prop])
+            }
+        }
+        console.log(this.viewModel)
 
         //templateValues contain templateValues of view variables to model variables.
         //strings are references to model variables. Functions are for when a view variable does
@@ -73,6 +87,11 @@ export default Backbone.View.extend({
 
             this.updateViewModel();
         }
+
+        //Should the viewModel contain the subviews instead of directives? 
+        //We have subViewImports have the constructor, 
+        //The defaults come from a subhash in defaults, and templateVars come from templateVars.
+
 
         var attrs = this.viewModel.attributes;
         var keys = Object.keys(this.viewModel.attributes);
@@ -127,7 +146,7 @@ export default Backbone.View.extend({
         
         this.viewModel.set(obj);
 
-
+        
         
     
     },
@@ -149,10 +168,10 @@ export default Backbone.View.extend({
 
         //Get all of the text nodes in the document.
         this._subViewElements = [];
-        this.textNodesUnder().forEach(function(fullTextNode){
+        this.getAllTextNodes().forEach(function(fullTextNode){
             //http://stackoverflow.com/a/21311670/1763217 textContent seems right
 
-            var re = /\{\{(.+?)\}\}/g;
+            var re = /\{\{(.+?)\}\}/g; //Match {{subViewName}}
             var match;
             
 
@@ -161,6 +180,7 @@ export default Backbone.View.extend({
             while ((match = re.exec(fullTextNode.textContent)) != null) {
                 matches.push(match)
             }
+            
 
             var currentTextNode = fullTextNode;
             var currentString = fullTextNode.textContent;
@@ -176,7 +196,7 @@ export default Backbone.View.extend({
                 
                 
                 prevNodesLength=match.index + entireMatch.length;//Note: This works accidentally. Might be wrong.
-            }.bind(this))
+            }.bind(this));
            
 
         }.bind(this));

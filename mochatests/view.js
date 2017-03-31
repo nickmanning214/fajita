@@ -1,9 +1,14 @@
+BaseView = Fajita.View.extend({
+    warn:false
+})
+
 describe("Fajita.View",function(){
 
-    var View = Fajita.View.extend({
+    var View = BaseView.extend({
         defaults:{
             header:"This is a header"
-        }
+        },
+        warn:false
     });
 
     describe("defaults",function(){
@@ -57,6 +62,46 @@ describe("Fajita.View",function(){
                 expect(view.get("header")).to.equal("Nick Manning")
             })
         });
+        
+    });
+    describe("subviews",function(){
+        var SubView = BaseView.extend({
+            defaults:{
+                content:"Here is the content"
+            }
+        })
+        describe("subview default",function(){
+            var ViewWithSubView = BaseView.extend({
+                defaults:{
+                    header:"This is a header"
+                },
+                subViewImports:{
+                    SubView:SubView
+                }
+            });
+            var view = new ViewWithSubView;
+            it("Should have the subview's defaults",function(){
+                //expect(view.get("->subView").get("content")).to.equal("Here is the content")
+            });
+        });
+        describe("subview default override",function(){
+            var ViewWithSubView = BaseView.extend({
+                defaults:{
+                    header:"This is a header",
+                    subView:{
+                        content:"Here is the overridden content"
+                    }
+                },
+                subViewImports:{
+                    subView:SubView
+                }
+            });
+            var view = new ViewWithSubView;
+            it("Should have the overridde defaults",function(){
+                //expect(view.get("->subView").get("content")).to.equal("Here is the overridden content")
+            });
+        })
+        
         
     })
     
