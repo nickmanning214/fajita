@@ -54,24 +54,22 @@ export default Backbone.View.extend({
         var attrs = _.extend(_.clone(this.defaults), options && options.defaultsOverride || {});
         this.viewModel = new Fajita.Model(attrs);
 
+        //I want to use this.set here but can't get it working without rewriting model.set to support two arguments
         if (this.subViewImports){
             for(var prop in this.subViewImports){
-                this.viewModel.set("->"+prop,attrs[prop])
-                console.log("->"+prop,attrs[prop])
+                if (attrs[prop] instanceof Array){
+                    this.viewModel.set("->"+prop, attrs[prop].map(obj=>{return _.extend({},this.subViewImports[prop].prototype.defaults,obj)}))
+                }
+                else this.viewModel.set("->"+prop,_.extend({},this.subViewImports[prop].prototype.defaults,attrs[prop]))
             }
         }
-        console.log(this.viewModel)
+
+        
 
         //templateValues contain templateValues of view variables to model variables.
         //strings are references to model variables. Functions are for when a view variable does
         //not match perfectly with a model variable. These are updated each time the model changes.
-        this.propMap = {};
-        this.funcs = {};
-
-        _.each(this.templateValues, function (modelVar, templateVar) {
-            if (typeof modelVar == "string") this.propMap[templateVar] = modelVar;
-            else if (typeof modelVar == "function") this.funcs[templateVar] = modelVar;
-        }.bind(this));
+        
 
         //Problem: if you update the model it updates for every subview (not efficient).
         //And it does not update for submodels. Perhaps there are many different solutions for this.
@@ -107,6 +105,10 @@ export default Backbone.View.extend({
         this.buildInnerHTML();
 
         this.initDirectives(); //init simple directives...the ones that just manipulate an element
+
+        
+
+
         this.delegateEvents();
 
         this.childNodes = [].slice.call(this.el.childNodes, 0);
@@ -130,18 +132,11 @@ export default Backbone.View.extend({
         var obj = {}
         
         //Change templateVars->modelVars to templateVars->model.get("modelVar"), and set on the model
-        _.extend(obj,_.mapObject(this.propMap,function(modelVar){
-            
-            return this.model.get(modelVar);
+        _.extend(obj,_.mapObject(this.templateValues,function(modelVar){
+            if (typeof modelVar=="string") return this.model.get(modelVar);
+            else if (typeof modelVar=="function") return modelVar.call(this)
         }.bind(this)));
         
-
-        _.extend(obj,_.mapObject(this.funcs,function(func){
-            var ret = func.call(this);
-            return ret;
-            //func.call makes it work but only once
-        }.bind(this)))
-                
 
         
         this.viewModel.set(obj);
@@ -212,32 +207,20 @@ export default Backbone.View.extend({
             var __proto = DirectiveRegistry[directiveName].prototype
             if (__proto instanceof Directive){ //because foreach will get more than just other directives
                 var name = __proto.name;
-                if (name!=="subview" && name!=="map"){
-                    var elements = (this.$el)?$.makeArray(this.$el.find("[nm-"+name+"]")):$.makeArray($(this.el.querySelectorAll("[nm-"+name+"]")));
-                
-                    if (elements.length) {
-                        this.directive[name] = elements.map(function(element,i,elements){
-                            //on the second go-around for nm-map, directiveName somehow is called "SubView"
-                            return new DirectiveRegistry[directiveName]({
-                                view:this,
-                                el:element,
-                                val:element.getAttribute("nm-"+name)
-                            });
-                        }.bind(this)); 
-                    }
-                }
-                else{
-                    /*
-                    this.directive["subview"] = this._subViewElements.map(function(subViewElement,i,subViewElements){
-                        return new DirectiveRegistry["Subview"]({
+                var elements = (this.$el)?$.makeArray(this.$el.find("[nm-"+name+"]")):$.makeArray($(this.el.querySelectorAll("[nm-"+name+"]")));
+            
+                if (elements.length) {
+                    this.directive[name] = elements.map(function(element,i,elements){
+                        //on the second go-around for nm-map, directiveName somehow is called "SubView"
+                        return new DirectiveRegistry[directiveName]({
                             view:this,
-                            el:subViewElement
+                            el:element,
+                            val:element.getAttribute("nm-"+name)
                         });
-                    }.bind(this)); */
+                    }.bind(this)); 
                 }
-                
             }
-        }
+        }   
 
 
          this._subViewElements.forEach(function(subViewElement){
@@ -342,6 +325,7 @@ export default Backbone.View.extend({
         }
     },
     set:function(obj){
+
         this.viewModel.set(obj);
     },
     get:function(prop){
