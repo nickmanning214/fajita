@@ -3,6 +3,7 @@
 /*import Backbone from "backbone";*/
 import DirectiveRegistry from "./directive/directiveRegistry.js"
 import Directive from "./directive/directive.js"
+import ViewModel from "./ViewModel";
 
 
 
@@ -52,15 +53,35 @@ export default Backbone.View.extend({
         
 
         var attrs = _.extend(_.clone(this.defaults), options && options.defaultsOverride || {});
-        this.viewModel = new Fajita.Model(attrs);
+        this.viewModel = new Fajita.ViewModel(attrs);
 
         //I want to use this.set here but can't get it working without rewriting model.set to support two arguments
+        
+
+        //For each subView, set the viewModel to a collection of views (if it is an array) or a view.
+        //It sends in defaultOverride and this's model as a model.
         if (this.subViewImports){
             for(var prop in this.subViewImports){
                 if (attrs[prop] instanceof Array){
-                    this.viewModel.set("->"+prop, attrs[prop].map(obj=>{return _.extend({},this.subViewImports[prop].prototype.defaults,obj)}))
+                    //this.viewModel.set(prop, attrs[prop].map(obj=>{return _.extend({},this.subViewImports[prop].prototype.defaults,obj)}))
+                    this.viewModel.set(prop,
+                    new Backbone.Collection(attrs[prop].map((obj,i)=>{
+                        let view = new this.subViewImports[prop]({
+                            model:this,
+                            defaultsOverride:this.defaults[prop][i]
+                        });
+                        return {view:view};
+                            
+                        })
+                    ))
                 }
-                else this.viewModel.set("->"+prop,_.extend({},this.subViewImports[prop].prototype.defaults,attrs[prop]))
+                else {
+                    //this.viewModel.set(prop,_.extend({},this.subViewImports[prop].prototype.defaults,attrs[prop]))
+                    this.viewModel.set(prop,new this.subViewImports[prop]({
+                        model:this,
+                        defaultsOverride:this.defaults[prop]
+                    }))
+                }
             }
         }
 
@@ -84,6 +105,16 @@ export default Backbone.View.extend({
             });
 
             this.updateViewModel();
+
+            _.each(this.templateValues,function(val,key){
+                if (typeof val==="object"){
+
+                    this.viewModel.set(key,new this.subViewImports[key]({
+                        model:this.model,
+                        templateValues:val
+                    }));
+                } 
+            }.bind(this))
         }
 
         //Should the viewModel contain the subviews instead of directives? 
@@ -129,17 +160,13 @@ export default Backbone.View.extend({
     updateViewModel:function(){
 
         
-        var obj = {}
         
-        //Change templateVars->modelVars to templateVars->model.get("modelVar"), and set on the model
-        _.extend(obj,_.mapObject(this.templateValues,function(modelVar){
+        this.viewModel.set(_.mapObject(this.templateValues,function(modelVar){
             if (typeof modelVar=="string") return this.model.get(modelVar);
             else if (typeof modelVar=="function") return modelVar.call(this)
         }.bind(this)));
-        
 
         
-        this.viewModel.set(obj);
 
         
         

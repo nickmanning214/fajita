@@ -1,3 +1,3 @@
-Fajita.ViewModel = Backbone.Model.extend({
+export default Backbone.Model.extend({
     
 })

@@ -3,12 +3,13 @@
 /*import _ from "underscore";*/
 /*import Backbone from "backbone";*/
 import Model from "./Model";
+import ViewModel from "./ViewModel";
 import Collection from "./Collection";
 import View from "./View";
 import DirectiveRegistry from "./directive/directiveRegistry";
 /*import $ from "jquery";*/
 
-var Fajita = {Model, Collection, View, DirectiveRegistry};
+var Fajita = {Model, ViewModel, Collection, View, DirectiveRegistry};
 Fajita["🌮"] = "0.0.0";
 
 if (typeof window!=="undefined") window.Fajita = Fajita;
