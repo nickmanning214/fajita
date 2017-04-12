@@ -1,21 +1,27 @@
 /*import Backbone from "backbone";*/
+/*
+    Note: use view.get for defaultOverride because referring to the defaults hash directly might not be correct in the case of nested nested subViews 
+
+*/
+
 import Directive from "./directive";
 import AbstractSubview from "./abstract-subview"
 export default AbstractSubview.extend({
     name:"subview",
     _initializeChildViews:function(){
+
         if (this.view.subViewImports[this.subViewName].prototype instanceof Backbone.View) this.ChildConstructor = this.view.subViewImports[this.subViewName];
         else this.ChildConstructor = this.view.subViewImports[this.subViewName]/*.call(this.view);*/
 
          var options = {};
            
-        if (this.defaultsOverride){
-            _.extend(options,{defaultsOverride:this.defaultsOverride});
+        if (this.view.get(this.subViewName)){
+            _.extend(options,{defaultsOverride:this.view.get(this.subViewName)});
         }
 
-        if (this.childMappings){
+        if (this.view.templateValues && this.view.templateValues[this.subViewName]){
             _.extend(options,{
-                templateValues:this.childMappings
+                templateValues:this.view.templateValues[this.subViewName]
                 //,el:this.el The el of the directive should belong to the directive but not the subview itself
             })
         }
@@ -50,8 +56,6 @@ export default AbstractSubview.extend({
         //this.val, this.view
 
         this._initializeBackboneObject();
-        this._initializeChildMappings();
-        this._initializedefaultsOverride();
         this._initializeChildViews();
         
         
@@ -80,10 +84,10 @@ export default AbstractSubview.extend({
                 //Map models to childView instances with their templateValues
                 this.ChildView = this.view.childViewImports[this.subViewName];
                 this.childViewOptions = {
-                    templateValues:this.childMappings,
+                    templateValues:this.view.templateValues && this.view.templateValues[this.subViewName],
                     collection:this.subCollection,
                     tagName:this.view.childViewImports[this.subViewName].prototype.tagName || "subitem",
-                    defaultsOverride:this.defaultsOverride
+                    defaultsOverride:this.view.get(this.subViewName)
                 };
                 this.childViews = this.subCollection.map(function(childModel,i){
                     
@@ -91,8 +95,8 @@ export default AbstractSubview.extend({
                         model:childModel,
                         index:i,
                         lastIndex:this.subCollection.length - i - 1,
-                        defaultsOverride:this.defaultsOverride && this.defaultsOverride.models[i] && this.defaultsOverride.models[i].attributes,
-                        //Just added check for this.defaultsOverride.models[i]
+                        defaultsOverride:this.view.get(this.subViewName) && this.view.get(this.subViewName).models[i] && this.view.get(this.subViewName).models[i].attributes,
+                        //Just added check for this.view.get(this.subViewName).models[i]
                     });
                     
                     var childview = new this.ChildView(childViewOptions);
@@ -119,13 +123,13 @@ export default AbstractSubview.extend({
         
         var options = {};
            
-        if (this.defaultsOverride){
-            _.extend(options,{defaultsOverride:this.defaultsOverride});
+        if (this.view.get(this.subViewName)){
+            _.extend(options,{defaultsOverride:this.view.get(this.subViewName)});
         }
 
-        if (this.childMappings){
+        if (this.view.templateValues){
             _.extend(options,{
-                templateValues:this.childMappings
+                templateValues:this.view.templateValues[this.subViewName]
                 //,el:this.el The el of the directive should belong to the directive but not the subview itself
             })
         }
@@ -193,7 +197,7 @@ export default AbstractSubview.extend({
             else {
                 var newChildView = new this.ChildView({
                     model:model,
-                    templateValues:this.childMappings,
+                    templateValues:this.view.templateValues && this.view.templateValues[this.subViewName],
                     index:i,
                     lastIndex:this.subCollection.length - i - 1,
                     collection:this.subCollection,

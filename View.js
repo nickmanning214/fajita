@@ -5,18 +5,17 @@ import DirectiveRegistry from "./directive/directiveRegistry.js"
 import Directive from "./directive/directive.js"
 import ViewModel from "./ViewModel";
 
-
+function getAllTextNodes(el){
+    //http://stackoverflow.com/questions/10730309/find-all-text-nodes-in-html-page
+    var n, a=[], walk=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,null,false);
+    while(n=walk.nextNode()) a.push(n);
+    return a;
+}
 
 var backboneViewOptions = ['model', 'collection', 'el', 'id', 'attributes', 'className', 'tagName', 'events'];
 var additionalViewOptions = ['warn','templateValues','templateString','childViewImports','subViewImports','index','lastIndex','defaultsOverride']
 export default Backbone.View.extend({
-    getAllTextNodes:function(){
-        //http://stackoverflow.com/questions/10730309/find-all-text-nodes-in-html-page
-        var n, a=[], walk=document.createTreeWalker(this.el,NodeFilter.SHOW_TEXT,null,false);
-        while(n=walk.nextNode()) a.push(n);
-        return a;
-        
-    },
+    
      constructor: function constructor(options) {
 
         var options = options || {};
@@ -60,31 +59,35 @@ export default Backbone.View.extend({
 
         //For each subView, set the viewModel to a collection of views (if it is an array) or a view.
         //It sends in defaultOverride and this's model as a model.
+
+        //Actually that's a confusing API. The question is...should childViewImports be a thing or should it all be called subViewImports?
+
         if (this.subViewImports){
             for(var prop in this.subViewImports){
-                if (attrs[prop] instanceof Array){
-                    //this.viewModel.set(prop, attrs[prop].map(obj=>{return _.extend({},this.subViewImports[prop].prototype.defaults,obj)}))
-                    this.viewModel.set(prop,
-                    new Backbone.Collection(attrs[prop].map((obj,i)=>{
+                //this.viewModel.set(prop,_.extend({},this.subViewImports[prop].prototype.defaults,attrs[prop]))
+                if (this.defaults[prop] instanceof Array){
+                     var subview = new Backbone.Collection(attrs[prop].map((obj,i)=>{
                         let view = new this.subViewImports[prop]({
                             model:this,
                             defaultsOverride:this.defaults[prop][i]
                         });
                         return {view:view};
-                            
                         })
-                    ))
+                    )
                 }
-                else {
-                    //this.viewModel.set(prop,_.extend({},this.subViewImports[prop].prototype.defaults,attrs[prop]))
-                    this.viewModel.set(prop,new this.subViewImports[prop]({
+                else{
+                    var subview = new this.subViewImports[prop]({
                         model:this,
-                        defaultsOverride:this.defaults[prop]
-                    }))
+                        defaultsOverride:this.defaults[prop],
+                        //new
+                        templateValues:this.templateValues && this.templateValues[prop]
+                    });
                 }
+                subview.parent = this;
+                this.viewModel.set(prop,subview);
             }
         }
-
+        
         
 
         //templateValues contain templateValues of view variables to model variables.
@@ -135,9 +138,62 @@ export default Backbone.View.extend({
         this._ensureElement();
         this.buildInnerHTML();
 
+        this._subViewElements = [];
         this.initDirectives(); //init simple directives...the ones that just manipulate an element
 
+        this._parseTextNodes();
+
+
+        //map requires a ":". Should be test against the value though, not whether there is a colon.
         
+        //Before, subViews were directives and accessing a subview meant accessing through this.directive.
+        //But now you simply use view.get(subView) to get the actual subView.
+
+        //The only thing you have to do here is move the code from the sperate subView directive to here.
+        //Maybe add a parentView reference to the subView, (if does not exist already).
+        
+        this._subViewElements.forEach(function(subViewElement){
+            var props = subViewElement.match.split(":");
+            console.log(props)
+            var subViewConstructor = this.subViewImports[props[0]];
+            var context = this.get(props[1]);
+            if (context instanceof Backbone.Collection){
+                var collectionOfViews = this.get(props[0]);
+                collectionOfViews.each(function(model,i){
+                    if (i==0) $(subViewElement).replaceWith(model.get("view").el)
+                    else{
+                        $(collectionOfViews.at(i-1).get("view").el).after(model.get("view").el)
+                    }
+                })
+            }
+            else{
+                $(subViewElement).replaceWith(this.get(props[0]).el)
+            }
+        }.bind(this))
+        /*
+        this._subViewElements.forEach(function(subViewElement){
+            var args = subViewElement.match.split(":");
+            if (args.length==1){
+
+
+                if (!this.directive["subview"]) this.directive["subview"] = [];
+                this.directive["subview"].push(new DirectiveRegistry["Subview"]({
+                    view:this,
+                    el:subViewElement,
+                    val:subViewElement.match
+                }));
+                console.log(subViewElement.match)
+            }
+            else{
+                if (!this.directive["map"]) this.directive["map"] = [];
+                this.directive["map"].push(new DirectiveRegistry["Map"]({
+                    view:this,
+                    el:subViewElement,
+                    val:subViewElement.match
+                }));
+            }
+        }.bind(this))
+        */
 
 
         this.delegateEvents();
@@ -183,31 +239,37 @@ export default Backbone.View.extend({
             //maybe less hackish solution http://stackoverflow.com/a/25214113/1763217
         }
     },
-    initDirectives:function(){
+    _parseTextNodes:function(){
+        //This function goes through each text node in the element e.g: (textNode<div>textNode</div>textNode), and splits
+        //the textNodes so that {{subViewName}} is its own textNode. Then it adds all textNodes matching {{subViewName}} to
+        //this._subViewElements
 
-        
-        //Init directives involving {{}}
 
-        //Get all of the text nodes in the document.
-        this._subViewElements = [];
-        this.getAllTextNodes().forEach(function(fullTextNode){
+         //Init directives involving {{}}
+
+        //Get all of the text nodes in the document. e.g: (textNode<div>textNode</div>textNode)
+
+        getAllTextNodes(this.el).forEach(function(fullTextNode){
             //http://stackoverflow.com/a/21311670/1763217 textContent seems right
 
             var re = /\{\{(.+?)\}\}/g; //Match {{subViewName}}
             var match;
             
 
-
             var matches = [];
             while ((match = re.exec(fullTextNode.textContent)) != null) {
                 matches.push(match)
             }
+            //For each text node, get the array of matches. 
+            //A match is an array itself, with match[0] being the match and match[1] being the captured part
+            //Additionally it has the index and the input as properties.
             
-
             var currentTextNode = fullTextNode;
             var currentString = fullTextNode.textContent;
             var prevNodesLength = 0;
 
+            //For each match, split the text node into multiple text nodes (in case there are multiple subViews in a textNode).
+            //Then, add each textNode of {{subView}} to this._subViewElements.
             matches.forEach(function(match){
                 var varNode = currentTextNode.splitText(match.index - prevNodesLength);
                 var entireMatch = match[0]
@@ -222,6 +284,10 @@ export default Backbone.View.extend({
            
 
         }.bind(this));
+    },
+    initDirectives:function(){
+
+        
         
         
         
@@ -249,44 +315,10 @@ export default Backbone.View.extend({
             }
         }   
 
-
-         this._subViewElements.forEach(function(subViewElement){
-            var args = subViewElement.match.split(":");
-            if (args.length==1){
-                if (!this.directive["subview"]) this.directive["subview"] = [];
-                this.directive["subview"].push(new DirectiveRegistry["Subview"]({
-                    view:this,
-                    el:subViewElement,
-                    val:subViewElement.match
-                }));
-            }
-            else{
-                if (!this.directive["map"]) this.directive["map"] = [];
-                this.directive["map"].push(new DirectiveRegistry["Map"]({
-                    view:this,
-                    el:subViewElement,
-                    val:subViewElement.match
-                }));
-            }
-        }.bind(this))
-
+        
 
        
-        /*
-        this._subViewElements.forEach(function(subViewElement){
-            var args = subViewElement.match.split(":");
-            if (args.length==1){
-                //subview with no context obj
-            }else{
-                //Check for collection or model passed.
-            }
-
-
-            var element = document.createElement("span");
-            element.style.background="yellow";
-            element.innerHTML = subViewElement.match;
-            subViewElement.parentNode.replaceChild(element,subViewElement);
-        })*/
+     
 
        
 
@@ -333,7 +365,6 @@ export default Backbone.View.extend({
 
     tagName:undefined,//don't want a tagName to be div by default. Rather, make it a documentfragment'
     subViewImports:{},
-    childViewImports:{},
     _ensureElement: function() {
             //Overriding this to support document fragments
         if (!this.el) {
