@@ -68,7 +68,7 @@ export default Backbone.View.extend({
                 if (this.defaults[prop] instanceof Array){
                      var subview = new Backbone.Collection(attrs[prop].map((obj,i)=>{
                         let view = new this.subViewImports[prop]({
-                            model:this,
+                            model:this.model,
                             defaultsOverride:this.defaults[prop][i]
                         });
                         return {view:view};
@@ -77,7 +77,7 @@ export default Backbone.View.extend({
                 }
                 else{
                     var subview = new this.subViewImports[prop]({
-                        model:this,
+                        model:this.model,
                         defaultsOverride:this.defaults[prop],
                         //new
                         templateValues:this.templateValues && this.templateValues[prop]
