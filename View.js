@@ -54,6 +54,8 @@ export default Backbone.View.extend({
         var attrs = _.extend(_.clone(this.defaults), options && options.defaultsOverride || {});
         this.viewModel = new Fajita.ViewModel(attrs);
 
+        this.viewCollection = new Fajita.Collection(this.defaultsOverride || this.defaults);
+
         //I want to use this.set here but can't get it working without rewriting model.set to support two arguments
         
 
