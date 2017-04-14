@@ -65,29 +65,18 @@ export default Backbone.View.extend({
         //Actually that's a confusing API. The question is...should childViewImports be a thing or should it all be called subViewImports?
 
         if (this.subViewImports){
-            for(var prop in this.subViewImports){
-                //this.viewModel.set(prop,_.extend({},this.subViewImports[prop].prototype.defaults,attrs[prop]))
-                if (this.defaults[prop] instanceof Array){
-                     var subview = new Backbone.Collection(attrs[prop].map((obj,i)=>{
-                        let view = new this.subViewImports[prop]({
-                            model:this.model,
-                            defaultsOverride:this.defaults[prop][i]
-                        });
-                        return {view:view};
-                        })
-                    )
-                }
-                else{
-                    var subview = new this.subViewImports[prop]({
+            _.each(this.subViewImports,function(SubView,subViewName){
+                this.defaults.forEach(function(defaultsObj,subViewIndex){
+                    var subview = new SubView({
                         model:this.model,
-                        defaultsOverride:this.defaults[prop],
+                        defaultsOverride:defaultsObj[subViewName],
                         //new
-                        templateValues:this.templateValues && this.templateValues[prop]
+                        templateValues:this.templateValues && this.templateValues[subViewIndex] && this.templateValues[subViewIndex][subViewName]
                     });
-                }
-                subview.parent = this;
-                this.viewModel.set(prop,subview);
-            }
+                    subview.parent = this;
+                    this.viewCollection.at(subViewIndex).set(subViewName,subview);
+                }.bind(this))
+            }.bind(this));
         }
         
         
