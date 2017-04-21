@@ -21,7 +21,7 @@ Often you see something like this in Backbone applications:
     });
     
     
-    TeamView = new TeamView({
+    var view = new TeamView({
         model:team
     });
     
