@@ -16,8 +16,8 @@ Often you see something like this in Backbone applications:
     });
     
     var team = new Team({
-      cityAndMascot:"Minnesota Vikings",
-      teamDescription:"The Minnesota Vikings are an American football team based in Minneapolis, Minnesota. The Vikings joined the National Football League as an expansion team in 1960, and first took the field for the 1961 season."
+      cityAndMascot:"San Diego Chargers",
+      teamDescription:"The Chargers compete in the National Football League (NFL) as a member club of the league's American Football Conference (AFC) West division. The club began play in 1960 as a charter member of the American Football League (AFL), and spent its first season in Los Angeles, before moving to San Diego in 1961 to become the San Diego Chargers."
     });
     
     
@@ -37,8 +37,8 @@ The problem here is that the variables `cityAndMascot` and `teamDescription` are
     });
     
     var team = new Team({
-      cityAndMascot:"Minnesota Vikings",
-      teamDescription:"The Minnesota Vikings are an American football team based in Minneapolis, Minnesota. The Vikings joined the National Football League as an expansion team in 1960, and first took the field for the 1961 season."
+      cityAndMascot:"San Diego Chargers",
+      teamDescription:"The Chargers compete in the National Football League (NFL) as a member club of the league's American Football Conference (AFC) West division. The club began play in 1960 as a charter member of the American Football League (AFL), and spent its first season in Los Angeles, before moving to San Diego in 1961 to become the San Diego Chargers."
     });
     
     
