@@ -53,7 +53,8 @@ The problem here is that the variables `cityAndMascot` and `teamDescription` are
     
     //application code
     view.listenTo(viewModel,"set",function(){this.render()})
-    viewModel.listenTo(team,"set:cityAndMascot",function(){this.set("header_content",team.get("cityAndMascot"))});                 viewModel.listenTo(team,"set:teamDescription",function(){this.set("paragraph_content",team.get("teamDescription"))})
+    viewModel.listenTo(team,"set:cityAndMascot",function(){this.set("header_content",team.get("cityAndMascot"))});      
+    viewModel.listenTo(team,"set:teamDescription",function(){this.set("paragraph_content",team.get("teamDescription"))})
 
 
 Now `HeaderParagraphView` is not married to `Team` with its template variables. Theoretically, you could re-use `HeaderParagraphView` in another application with a completely different model. Underneath `//application code`, you see all of the code that is necessary to make the app run. When you start to make a lot more views in this manner, you realize there is a lot of boilerplate code with this approach. 
