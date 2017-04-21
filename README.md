@@ -31,8 +31,8 @@ The problem here is that the variables `cityAndMascot` and `teamDescription` are
     Team = Backbone.Model.extend({});
     HeaderParagraphView = Backbone.View.extend({
         template:`
-            <h1> </h1>
-            <p> </p>   
+            <h1> <%= header_content %> </h1>
+            <p> <%= paragraph_content %> </p>   
         `
     });
     
@@ -46,9 +46,15 @@ The problem here is that the variables `cityAndMascot` and `teamDescription` are
         model:team
     });
     
+    var viewModel = new Backbone.Model({
+        header_content:team.get("cityAndMascot"),
+        paragraph_content:team.get("teamDescription")
+    });
+    
     //application code
-    view.listenTo(team,"set:cityAndMascot",function(){this.$el.find("h1").html(this.model.get("cityAndMascot"))})
-    view.listenTo(team,"set:teamDescription",function(){this.$el.find("h1").html(this.model.get("teamDescription"))})
+    view.listenTo(viewModel,"set",function(){this.render()})
+    viewModel.listenTo(team,"set:cityAndMascot",function(){this.set("header_content",team.get("cityAndMascot"))});                 viewModel.listenTo(team,"set:teamDescription",function(){this.set("paragraph_content",team.get("teamDescription"))})
+
 
 Now `HeaderParagraphView` is not married to `Team` with its template variables. Theoretically, you could re-use `HeaderParagraphView` in another application with a completely different model. Underneath `//application code`, you see all of the code that is necessary to make the app run. When you start to make a lot more views in this manner, you realize there is a lot of boilerplate code with this approach. 
 
