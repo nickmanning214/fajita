@@ -57,14 +57,16 @@ The problem here is that the variables `cityAndMascot` and `teamDescription` are
     viewModel.listenTo(team,"set:teamDescription",function(){this.set("paragraph_content",team.get("teamDescription"))})
 
 
-Now `HeaderParagraphView` is not married to `Team` with its template variables. Theoretically, you could re-use `HeaderParagraphView` in another application with a completely different model. Underneath `//application code`, you see all of the code that is necessary to make the app run. When you start to make a lot more views in this manner, you realize there is a lot of boilerplate code with this approach. 
+Now `HeaderParagraphView` is not married to `Team` with its template variables. Theoretically, you could re-use `HeaderParagraphView` in another application with a completely different model. 
 
+In Fajita Views, you don't need to explicitly make a seperate viewModel. A viewModel is instantiated automatically inside the constructor of Fajita.View. This viewModel is supposed to be like a private variable. You can get a property from the viewModel with `Fajita.View:get`, and you can set a property on the viewModel with `Fajita.View:set`.
 
-## Vision
+Furthermore, all of that code under `//application code` is not necessary. The view automatically listens to the viewModel and renders the template when the viewModel changes. 
 
-The vision behind Fajita is to provide an efficent way to link a deep view and a deep model, and have the view automatically update when changes to the model occur. 
+Passing a model in is optional. If you have no model, you can change the viewModel explicitly with `viewModel.set`. The initial values of the viewModel are equal to a `defaults` hash in the constructor.
 
-We want to improve on this by 
+If you pass a model in, you can also map model properties to viewModel properties using a `templateVariables` hash. 
+
 
 ## Fajita.Model
 
