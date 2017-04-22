@@ -3,6 +3,24 @@ A custom extension of Backbone.js, providing deep models, directives, and other 
 
 ## Problems that Fajita seeks to solve.
 
+The problems that Fajita seeks to solve are firstly, to make views and subviews modular/portable. Views are not portable when their template contains model attributes. For example, if a view's template looks like:
+
+    `<h1> <%= actor_name %> </h1>`
+
+then it is not modular because you can't take this view and apply it to something other than an actor. An ideal modular view has variable names that don't have model property names embedded into it. A good view would be:
+
+    Backbone.View.extend({
+        template:`<h1> <%= header_content %> </h1>`,
+        events:{
+            "h1 click":function(){
+                //some sort of animation or something
+            }
+        }
+    });
+    
+This view is modular because any model could go to it. You just have to find a way to plug a model into this view.
+    
+
 ### Model variables inside of view templates
 
 Often you see something like this in Backbone applications:
@@ -59,6 +77,8 @@ The problem here is that the variables `cityAndMascot` and `teamDescription` are
 
 Now `HeaderParagraphView` is not married to `Team` with its template variables. Theoretically, you could re-use `HeaderParagraphView` in another application with a completely different model. 
 
+### Boilerplate
+
 In Fajita Views, you don't need to explicitly make a seperate viewModel. A viewModel is instantiated automatically inside the constructor of Fajita.View. This viewModel is supposed to be like a private variable. You can get a property from the viewModel with `Fajita.View:get`, and you can set a property on the viewModel with `Fajita.View:set`.
 
 Furthermore, all of that code under `//application code` is not necessary. The view automatically listens to the viewModel and renders the template when the viewModel changes. 
@@ -66,6 +86,8 @@ Furthermore, all of that code under `//application code` is not necessary. The v
 Passing a model in is optional. If you have no model, you can change the viewModel explicitly with `viewModel.set`. The initial values of the viewModel are equal to a `defaults` hash in the constructor.
 
 If you pass a model in, you can also map model properties to viewModel properties using a `templateVariables` hash. 
+
+
 
 
 ## Fajita.Model
