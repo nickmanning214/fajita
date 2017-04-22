@@ -20,6 +20,13 @@ then it is not modular because you can't take this view and apply it to somethin
     
 This view is modular because any model could go to it. You just have to find a way to plug a model into this view.
     
+### Protability of Sub Views 
+ 
+### Slow Render function where you lose events/references/etc
+
+### Sub Models vs Flat Models (a compromise)
+
+    
 
 ### Model variables inside of view templates
 
