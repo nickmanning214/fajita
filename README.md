@@ -3,6 +3,43 @@ A custom extension of Backbone.js, providing deep models, directives, and other 
 
 ## Problems that Fajita seeks to solve.
 
+### The problematic "render" function
+
+Backbone encourages the use of underscore.js templates and a render function which rerenders the template from scratch. This is problematic because string rendering of HTML causes the DOM to be completely refreshed with new elements, so all events and references to elements are lost. You can hack your way around the loss of events on the elements with the common practice of calling `this.delegateEvents()` at the end of the render function, but this doesn't solve every problem. How will you handle other references to the elements in your view? What if you have subviews inside of your view? String templates are very problematic to maintain.
+
+Fajita makes it a rule: after the initial render, there is no "rendering" of the template. Instead, the view listens to the model and uses javascript to change the innerHTML of the target element. 
+
+So instead of this:
+
+    View = Backbone.View.extend({
+        template:_.template(`<h1> <%= firstName %> <%= lastName %> </h1><button> Click me! </button>`),
+        render:function(){
+           this.$el.html(this.template());
+        },
+        events:{
+            "click button":function(){
+                alert(this.model.get("bio"));
+            }
+        }
+    });
+    
+    var lebron = new Backbone.Model({
+        firstName:"LeBron",
+        lastName:"James",
+        bio:"Plays for the Cleveland Cavaliers"
+    });
+    
+    view = new View({
+        model:lebron
+    });
+    view.render();
+    
+
+
+
+### Portability of Views 
+
+
 The problems that Fajita seeks to solve are firstly, to make views and subviews modular/portable. Views are not portable when their template contains model attributes. For example, if a view's template looks like:
 
     `<h1> <%= actor_name %> </h1>`
@@ -20,9 +57,10 @@ then it is not modular because you can't take this view and apply it to somethin
     
 This view is modular because any model could go to it. You just have to find a way to plug a model into this view.
     
-### Protability of Sub Views 
- 
-### Slow Render function where you lose events/references/etc
+#### Portability of Sub Views    
+
+
+
 
 ### Sub Models vs Flat Models (a compromise)
 
