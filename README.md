@@ -7,7 +7,7 @@ A custom extension of Backbone.js, providing deep models, directives, and other 
 
 Backbone encourages the use of underscore.js templates and a render function which rerenders the template from scratch. This is problematic because string rendering of HTML causes the DOM to be completely refreshed with new elements, so all events and references to elements are lost. You can hack your way around the loss of events on the elements with the common practice of calling `this.delegateEvents()` at the end of the render function, but this doesn't solve every problem. How will you handle other references to the elements in your view? What if you have subviews inside of your view? String templates are very problematic to maintain.
 
-Fajita makes it a rule: after the initial render, there is no "rendering" of the template. Instead, the view listens to the model and uses javascript to change the innerHTML of the target element. 
+Fajita makes it a rule: after the initial render, there is no "rendering" of the template. Instead, the view listens to the model and uses javascript to change DOM of the template with optimized directives.
 
 So instead of this:
 
