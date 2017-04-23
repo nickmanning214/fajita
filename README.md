@@ -39,11 +39,12 @@ Fajita views have the portability of custom HTML elements, but without a new and
 
 ### Management of Sub Views    
 
-There is no mechanism for managing subviews built into Backbone. The word "Sub View" is vague, and has many different meanings. The problem that Fajita wants to solve is to be able to fix a view as having a particular type of subview, and be able to reuse this subview in different parent views across different applications.
+While we want views to be portable, we also want them to be pluggable into other views. Fajita seeks to build a mechanism to include a view inside another view. 
 
 ### Sub Models vs Flat Models (a compromise)
 
-Backbone applications are intended to work with a server, so it is convenient to keep models flat, since SQL tables are also flat and are joined by IDs. However, in front-end applications, managing 
+Backbone applications are intended to work with a server, so it is convenient to keep models flat, since SQL tables are also flat and are joined by IDs. However, in front-end applications, treating your application like you are managing rows in a table is both inefficient and doesn't feel right. Adding structure to objects is a much more front-end way of doing things. 
+
 ## Philosophy
 
 In Fajita, a View is thought of as a wrapper for a template, and a template is an HTML structure with embedded behaviors (directives).
