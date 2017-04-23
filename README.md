@@ -3,44 +3,22 @@ A custom extension of Backbone.js, providing deep models, directives, and other 
 
 ## Problems that Fajita seeks to solve.
 
-### The problematic "render" function
+### The problematic "render" function in views
 
-Backbone encourages the use of underscore.js templates and a render function which rerenders the template from scratch. This is problematic because string rendering of HTML causes the DOM to be completely refreshed with new elements, so all events and references to elements are lost. You can hack your way around the loss of events on the elements with the common practice of calling `this.delegateEvents()` at the end of the render function, but this doesn't solve every problem. How will you handle other references to the elements in your view? What if you have subviews inside of your view? String templates are very problematic to maintain.
+The simplest and most common pattern for view management in backbone applications is to render a template every time a model changes using `this.$el.html(this.template(this.model.attributes))`. This is approach has a few problems:
 
-Fajita makes it a rule: after the initial render, there is no "rendering" of the template. Instead, the view listens to the model and uses javascript to change DOM of the template with optimized directives.
-
-So instead of this:
-
-    View = Backbone.View.extend({
-        template:_.template(`<h1> <%= firstName %> <%= lastName %> </h1><button> Click me! </button>`),
-        render:function(){
-           this.$el.html(this.template());
-        },
-        events:{
-            "click button":function(){
-                alert(this.model.get("bio"));
-            }
-        }
-    });
-    
-    var lebron = new Backbone.Model({
-        firstName:"LeBron",
-        lastName:"James",
-        bio:"Plays for the Cleveland Cavaliers"
-    });
-    
-    view = new View({
-        model:lebron
-    });
-    view.render();
-    
+* Inefficient to render large templates
+* Events on the elements in the template are lost when the template is rerendered
+* References to elements inside of the template are lost when the template is rerendered
+* Subviews have to be rebuilt when a parent view is rerendered
 
 
+The solution, which is implemented by modern frameworks today, is to use directives which use Javascript to programatically manipulate the DOM. 
 
-### Portability of Views 
 
+### Portability of View classes 
 
-The problems that Fajita seeks to solve are firstly, to make views and subviews modular/portable. Views are not portable when their template contains model attributes. For example, if a view's template looks like:
+Views are not portable when their template contains model attributes. For example, if a view's template looks like:
 
     `<h1> <%= actor_name %> </h1>`
 
@@ -55,16 +33,22 @@ then it is not modular because you can't take this view and apply it to somethin
         }
     });
     
-This view is modular because any model could go to it. You just have to find a way to plug a model into this view.
-    
-#### Portability of Sub Views    
+This view is modular because any model could go to it. Fajita solves this problem by offering a way to hook a model into a view in a more portable way.
 
+Fajita views have the portability of custom HTML elements, but without a new and obscure HTML syntax.
 
+### Management of Sub Views    
 
+There is no mechanism for managing subviews built into Backbone. The word "Sub View" is vague, and has many different meanings. The problem that Fajita wants to solve is to be able to fix a view as having a particular type of subview, and be able to reuse this subview in different parent views across different applications.
 
 ### Sub Models vs Flat Models (a compromise)
 
+Backbone applications are intended to work with a server, so it is convenient to keep models flat, since SQL tables are also flat and are joined by IDs. However, in front-end applications, managing 
+## Philosophy
+
+In Fajita, a View is thought of as a wrapper for a template, and a template is an HTML structure with embedded behaviors (directives).
     
+# Old
 
 ### Model variables inside of view templates
 
