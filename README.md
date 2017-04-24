@@ -47,7 +47,19 @@ Backbone applications are intended to work with a server, so it is convenient to
 
 ### Control flow inside of templates
 
-We are of the belief that templates should be "logicless" and we don't think there needs to be any compromise. Underscore templates contain `if` statements and `each` statements. In fact, arbitrary javascript is allowed inside of the template. Directives which contain control flow is a step in the right direction, but directives in these frameworks are named so that they are still fundamentally control flow within a template. Symantically, naming a directive `optional` rather than `if` changes it from code to symmantic directives. 
+We are of the belief that templates should be "logicless" and we don't think there needs to be any compromise. Generally if you are using an `if` statement inside of a template, you are describing a behavior that can be symmantically explained in a directive. 
+
+For example, the pattern:
+
+    <% if (showElement) { %>
+        <div>Show this element!</div>
+    <% } %>
+    
+Can be rewritten to be:
+     
+     <div optional="showElement">Show this element!</div>
+     
+It is up to the Fajita library to support the "optional" directive. This is a better, more symmantic name than angular's `ngIf` because `if` is a vague statement that could mean anything. `optional` clearly conveys the purpose of the directive, that means the element is optionally shown based on a value. 
 
 ## Philosophy
 
