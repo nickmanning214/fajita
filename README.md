@@ -45,6 +45,10 @@ While we want views to be portable, we also want them to be pluggable into other
 
 Backbone applications are intended to work with a server, so it is convenient to keep models flat, since SQL tables are also flat and are joined by IDs. However, in front-end applications, treating your application like you are managing rows in a table is both inefficient and doesn't feel right. Adding structure to objects is a much more front-end way of doing things. 
 
+### Control flow inside of templates
+
+We are of the belief that templates should be "logicless" and we don't think there needs to be any compromise. Underscore templates contain `if` statements and `each` statements. In fact, arbitrary javascript is allowed inside of the template. Directives which contain control flow is a step in the right direction, but directives in these frameworks are named so that they are still fundamentally control flow within a template. Symantically, naming a directive `optional` rather than `if` changes it from code to symmantic directives. 
+
 ## Philosophy
 
 In Fajita, a View is thought of as a wrapper for a template, and a template is an HTML structure with embedded behaviors (directives).
