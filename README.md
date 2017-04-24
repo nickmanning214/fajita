@@ -61,6 +61,10 @@ Can be rewritten to be:
      
 It is up to the Fajita library to support the "optional" directive. This is a better, more symmantic name than angular's `ngIf` because `if` is a vague statement that could mean anything. `optional` clearly conveys the purpose of the directive, that means the element is optionally shown based on a value. 
 
+## Mixing javascript and HTML
+
+Frameworks like React are known for the controversial practice of mixing Javascript and HTML. Angular allows for generic javascript to be placed inside of directives. We believe in the practice of separating Javascript and HTML. Therefore, the only values allowed in directives are variable names. Any kind of code needs to be placed in the code for the directive. 
+
 ## Philosophy
 
 In Fajita, a View is thought of as a wrapper for a template, and a template is an HTML structure with embedded behaviors (directives).
