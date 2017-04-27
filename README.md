@@ -65,6 +65,12 @@ It is up to the Fajita library to support the "optional" directive. This is a be
 
 Frameworks like React are known for the controversial practice of mixing Javascript and HTML. Angular allows for generic javascript to be placed inside of directives. We believe in the practice of separating Javascript and HTML. Therefore, the only values allowed in directives are variable names. Any kind of code needs to be placed in the code for the directive. 
 
+### Forcing views to have a wrapper element
+
+Backbone views are based on the idea that a view has one single `el` and `$el`. It also allows you to build this wrapper element with `tagName`, `id`, `className`, and `attributes`. This is an unnecessary restriction which effects your HTML code. HTML code should ideally be completely free form and symantic, so to force wrapper elements due to javascript philosophy is not in the spirit of good HTML code.
+
+Instead each Fajita instance automatically has a dummy text node assigned to it, so that it can be anchored in a parent template. Then it has an array of nodes making up the DOM of the view.
+
 ## Philosophy
 
 In Fajita, a View is thought of as a wrapper for a template, and a template is an HTML structure with embedded behaviors (directives).
